@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Course {
+  id String @id @default(uuid())
+  name String
+  shortName String
+  courseClass CourseClass[]  
+  createdAt DateTime @default(now())
+}
+
+model Institution {
+  id String @id @default(uuid())
+  name String
+  shortName String
+  courseClass CourseClass[]
+  createdAt DateTime @default(now())
+} 
+
+model CourseClass {
+  id String @id @default(uuid())
+  courseId String
+  course Course @relation(fields: [courseId], references: [id])
+  institutionId String
+  institution Institution @relation(fields: [institutionId], references: [id])
+  enrollment Enrollment[]
+  createdAt DateTime @default(now())
+}
+
+model Student {
+  id String @id @default(uuid())
+  name String
+  email String
+  cpf String
+  enrollment Enrollment[]
+  createdAt DateTime @default(now())
+}
+
+model Enrollment {
+  id String @id @default(uuid())
+  studentId String
+  student Student @relation(fields: [studentId], references: [id])
+  courseClassId String
+  courseClass CourseClass @relation(fields: [courseClassId],references: [id])
+  enrollmentStatus EnrollmentStatus[]
+  createdAt DateTime @default(now())
+}
+
+// 0: john-doe/waiting, 1: john-doe/confirmed, 2: john-doe/active
+model EnrollmentStatus {
+  id String @id @default(uuid())
+  enrollmentId String
+  enrollmend Enrollment @relation(fields: [enrollmentId], references: [id])
+  enrollmentStatusTypeId String
+  enrollmentStatusType EnrollmentStatusType @relation(fields: [enrollmentStatusTypeId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+// 0: waiting, 1: confirmed, 2: active, 3: finished
+model EnrollmentStatusType {
+  id String @id @default(uuid())
+  name String
+  enrollmentStatus EnrollmentStatus[]
+  createdAt DateTime @default(now())
+}
