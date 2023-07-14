@@ -44,18 +44,15 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center">
-      <div>
-        <Image
-          src="/logo-v2.png"
-          alt="Logo Campi-Irdesi"
-          width={200}
-          height={40}
-          priority
-          className="mb-4"
-        />
-        <p className="font-bold text-xl mb-4">Pré-Inscrição para Curso EaD</p>
-      </div>
+    <main className="min-h-screen flex flex-col items-center justify-center gap-4">
+      <Image
+        src="/logo-v2.png"
+        alt="Logo Campi-Irdesi"
+        width={200}
+        height={40}
+        priority
+      />
+      <p className="font-bold text-xl">Pré-Inscrição para Curso EaD</p>
       <form
         onSubmit={handleSubmit(userEnrollment)}
         className="flex flex-col gap-4 w-full max-w-xs"
