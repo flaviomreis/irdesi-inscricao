@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import isValidCPF from "@/utils/cpf-validator";
 
 const userEnrollmentFormSchema = z.object({
   name: z
@@ -25,7 +26,8 @@ const userEnrollmentFormSchema = z.object({
     .string()
     .trim()
     .length(11, "O CPF precisa ter 11 dígitos")
-    .refine((cpf) => !isNaN(+cpf), "O CPF precisa ser numérico"),
+    .refine((cpf) => !isNaN(+cpf), "O CPF precisa ser numérico")
+    .refine((cpf) => isValidCPF(cpf), "O CPF precisa ser válido"),
 });
 
 type UserEnrollmentFormData = z.infer<typeof userEnrollmentFormSchema>;
@@ -39,7 +41,7 @@ export default function Home() {
     resolver: zodResolver(userEnrollmentFormSchema),
   });
 
-  function userEnrollment(data: any) {
+  function userEnrollment(data: UserEnrollmentFormData) {
     console.log(data);
   }
 
@@ -54,7 +56,7 @@ export default function Home() {
       />
 
       <p className="font-bold text-xl">Pré-Inscrição para o Curso EaD:</p>
-      <p className="text-violet-800 text-xl items-center">
+      <p className="text-violet-800 text-xl text-center">
         Práticas Inclusivas para Atendimento a Alunos com TEA
       </p>
 
@@ -65,7 +67,7 @@ export default function Home() {
         <div className="flex flex-col gap-1">
           <label htmlFor="name">Nome</label>
           <input
-            type="name"
+            type="text"
             placeholder="Seu nome completo"
             {...register("name")}
             className="border border-zinc-200 shadow-sm rounded h-10 px-3"
