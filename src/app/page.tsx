@@ -69,13 +69,16 @@ export default function Home() {
             className="border border-zinc-200 shadow-sm rounded h-10 px-3"
           />
           {errors.name && (
-            <span className="text-sm text-red-500">{errors.name.message}</span>
+            <span className="text-xs text-red-500">{errors.name.message}</span>
           )}
         </div>
 
         <div className="flex flex-col gap-1">
           <label htmlFor="email">
-            Email (para envio da senha de acesso ao EaD)
+            Email{" "}
+            <span className="text-xs">
+              (para envio da senha de acesso ao EaD)
+            </span>
           </label>
           <input
             type="email"
@@ -84,12 +87,14 @@ export default function Home() {
             className="border border-zinc-200 shadow-sm rounded h-10 px-3"
           />
           {errors.email && (
-            <span className="text-sm text-red-500">{errors.email.message}</span>
+            <span className="text-xs text-red-500">{errors.email.message}</span>
           )}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="cpf">CPF (somente os números)</label>
+          <label htmlFor="cpf">
+            CPF <span className="text-xs">(somente os números)</span>
+          </label>
           <input
             type="text"
             placeholder="99999999999"
@@ -97,7 +102,7 @@ export default function Home() {
             className="border border-zinc-200 shadow-sm rounded h-10 px-3"
           />
           {errors.cpf && (
-            <span className="text-sm text-red-500">{errors.cpf.message}</span>
+            <span className="text-xs text-red-500">{errors.cpf.message}</span>
           )}
         </div>
 
