@@ -5,7 +5,6 @@ import { Amaranth, Inter } from "next/font/google";
 const appFont = Amaranth({
   weight: "400",
   subsets: ["latin"],
-  display: "swap",
 });
 
 export const metadata: Metadata = {

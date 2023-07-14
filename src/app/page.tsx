@@ -44,7 +44,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-4">
+    <main className="min-h-screen flex flex-col items-center justify-center gap-4 break-words mx-auto w-full max-w-xs">
       <Image
         src="/logo-v2.png"
         alt="Logo Campi-Irdesi"
@@ -52,10 +52,15 @@ export default function Home() {
         height={40}
         priority
       />
-      <p className="font-bold text-xl">Pré-Inscrição para Curso EaD</p>
+
+      <p className="font-bold text-xl">Pré-Inscrição para o Curso EaD:</p>
+      <p className="text-violet-800 text-xl items-center">
+        Práticas Inclusivas para Atendimento a Alunos com TEA
+      </p>
+
       <form
         onSubmit={handleSubmit(userEnrollment)}
-        className="flex flex-col gap-4 w-full max-w-xs"
+        className="flex flex-col gap-4 w-full"
       >
         <div className="flex flex-col gap-1">
           <label htmlFor="name">Nome</label>
