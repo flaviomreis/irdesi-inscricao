@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Amaranth, Inter } from "next/font/google";
 
 const appFont = Amaranth({
-  weight: "400",
+  weight: ["400", "700"],
   subsets: ["latin"],
 });
 

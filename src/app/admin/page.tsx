@@ -1,5 +1,8 @@
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
+import NextAuthProvider from "../providers/auth";
+import UserAuth from "@/components/UserAuth";
+import { useState } from "react";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração",
@@ -32,8 +35,8 @@ export default async function AdminPage() {
   const courseClasses = await getCourseClasses();
 
   return (
-    <div>
-      <h1>Admin page</h1>
+    <NextAuthProvider>
+      <UserAuth />
       <h2>Administradores</h2>
       {administrators.map((item) => {
         return (
@@ -68,6 +71,6 @@ export default async function AdminPage() {
           </p>
         );
       })}
-    </div>
+    </NextAuthProvider>
   );
 }

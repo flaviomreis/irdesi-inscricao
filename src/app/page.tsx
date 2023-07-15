@@ -59,7 +59,7 @@ export default function Home() {
         priority
       />
 
-      <p className="font-bold text-xl">Pré-Inscrição para o Curso:</p>
+      <p className="font-base text-xl">Pré-Inscrição para o Curso:</p>
       <p className="text-violet-800 text-xl text-center">
         Práticas Inclusivas para Atendimento a Alunos com TEA
       </p>
@@ -116,7 +116,7 @@ export default function Home() {
 
         <button
           type="submit"
-          className="bg-purple-800 rounded font-semibold text-white h-10 hover:bg-purple-600"
+          className="bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
         >
           Enviar
         </button>
