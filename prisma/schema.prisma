@@ -13,27 +13,27 @@ datasource db {
 model Course {
   id String @id @default(uuid())
   name String
-  shortName String
-  courseClass CourseClass[]  
-  createdAt DateTime @default(now())
+  short_name String
+  course_class CourseClass[]  
+  created_at DateTime @default(now())
 }
 
 model Institution {
   id String @id @default(uuid())
   name String
-  shortName String
-  courseClass CourseClass[]
-  createdAt DateTime @default(now())
+  short_name String
+  course_class CourseClass[]
+  created_at DateTime @default(now())
 } 
 
 model CourseClass {
   id String @id @default(uuid())
-  courseId String
-  course Course @relation(fields: [courseId], references: [id])
-  institutionId String
-  institution Institution @relation(fields: [institutionId], references: [id])
+  course_id String
+  course Course @relation(fields: [course_id], references: [id])
+  institution_id String
+  institution Institution @relation(fields: [institution_id], references: [id])
   enrollment Enrollment[]
-  createdAt DateTime @default(now())
+  created_at DateTime @default(now())
 }
 
 model Student {
@@ -42,33 +42,39 @@ model Student {
   email String
   cpf String
   enrollment Enrollment[]
-  createdAt DateTime @default(now())
+  created_at DateTime @default(now())
 }
 
 model Enrollment {
   id String @id @default(uuid())
-  studentId String
-  student Student @relation(fields: [studentId], references: [id])
-  courseClassId String
-  courseClass CourseClass @relation(fields: [courseClassId],references: [id])
-  enrollmentStatus EnrollmentStatus[]
-  createdAt DateTime @default(now())
+  student_id String
+  student Student @relation(fields: [student_id], references: [id])
+  course_class_id String
+  course_class CourseClass @relation(fields: [course_class_id],references: [id])
+  enrollment_status EnrollmentStatus[]
+  created_at DateTime @default(now())
 }
 
 // 0: john-doe/waiting, 1: john-doe/confirmed, 2: john-doe/active
 model EnrollmentStatus {
   id String @id @default(uuid())
-  enrollmentId String
-  enrollmend Enrollment @relation(fields: [enrollmentId], references: [id])
-  enrollmentStatusTypeId String
-  enrollmentStatusType EnrollmentStatusType @relation(fields: [enrollmentStatusTypeId], references: [id])
-  createdAt DateTime @default(now())
+  enrollment_id String
+  enrollmend Enrollment @relation(fields: [enrollment_id], references: [id])
+  enrollment_status_type_id String
+  enrollment_status_type EnrollmentStatusType @relation(fields: [enrollment_status_type_id], references: [id])
+  created_at DateTime @default(now())
 }
 
-// 0: waiting, 1: confirmed, 2: active, 3: finished
+// 0: sent, 1: confirmed, 2: active, 3: finished
 model EnrollmentStatusType {
   id String @id @default(uuid())
   name String
-  enrollmentStatus EnrollmentStatus[]
-  createdAt DateTime @default(now())
+  enrollment_status EnrollmentStatus[]
+  created_at DateTime @default(now())
+}
+
+model Administrator {
+  id String @id @default(uuid())
+  name String
+  email String
 }

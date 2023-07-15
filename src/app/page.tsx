@@ -55,7 +55,7 @@ export default function Home() {
         priority
       />
 
-      <p className="font-bold text-xl">Pré-Inscrição para o Curso EaD:</p>
+      <p className="font-bold text-xl">Pré-Inscrição para o Curso:</p>
       <p className="text-violet-800 text-xl text-center">
         Práticas Inclusivas para Atendimento a Alunos com TEA
       </p>
