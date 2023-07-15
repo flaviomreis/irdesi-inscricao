@@ -21,11 +21,6 @@ export default function UserAuthAction() {
           <div className="flex items-center gap-2">
             Área do Administrador:
             <span className="text-purple-800">{data?.user?.name}</span>
-            <img
-              className="rounded-full"
-              src={data?.user?.image ?? ""}
-              width={32}
-            />
           </div>
           <button
             onClick={() => signOut()}
