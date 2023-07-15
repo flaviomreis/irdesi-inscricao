@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +34,9 @@ const userEnrollmentFormSchema = z.object({
 type UserEnrollmentFormData = z.infer<typeof userEnrollmentFormSchema>;
 
 export default function Home() {
+  const params = useSearchParams();
+  const courseClass = params.get("course_class");
+
   const {
     register,
     handleSubmit,
