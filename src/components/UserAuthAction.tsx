@@ -8,7 +8,7 @@ export default function UserAuthAction() {
     <div className="flex justify-between items-center border-b border-gray-400">
       {status === "unauthenticated" ? (
         <div className="flex items-center justify-between w-full">
-          <div>Área do Administrador</div>
+          <div>Área de Administração</div>
           <button
             onClick={() => signIn()}
             className="bg-purple-800 font-bold text-sm rounded text-white p-2 px-4 hover:bg-purple-600"
@@ -19,7 +19,7 @@ export default function UserAuthAction() {
       ) : (
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
-            Área do Administrador:
+            Área do Administrador(a):
             <span className="text-purple-800">{data?.user?.name}</span>
           </div>
           <button
