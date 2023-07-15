@@ -1,0 +1,14 @@
+{
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "local-irdesi-inscricao",
+      "database": "irdesi_inscricao",
+      "username": "irdesi_user",
+      "password": "irdesi_password"
+    }
+  ]
+}

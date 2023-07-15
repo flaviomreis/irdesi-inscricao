@@ -2,7 +2,7 @@
 
 import { signIn, signOut, useSession } from "next-auth/react";
 
-export default function UserAuthAction() {
+export default function UserAuthBar() {
   const { data, status } = useSession();
   return (
     <div className="flex justify-between items-center border-b border-gray-400">
@@ -21,6 +21,7 @@ export default function UserAuthAction() {
           <div className="flex items-center gap-2">
             Área do Administrador(a):
             <span className="text-purple-800">{data?.user?.name}</span>
+            <img src={data?.user?.image ?? ""} width={32} alt="{data?.user?.name}" className="rounded-full"/>
           </div>
           <button
             onClick={() => signOut()}

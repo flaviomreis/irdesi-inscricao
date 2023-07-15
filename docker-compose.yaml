@@ -1,0 +1,15 @@
+version: '3'
+services:
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_PASSWORD=irdesi_password
+      - POSTGRES_DB=irdesi_inscricao
+      - POSTGRES_USER=irdesi_user
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdb-irdesi-inscricao:/var/lib/postgresql/data
+
+volumes:
+  pgdb-irdesi-inscricao:

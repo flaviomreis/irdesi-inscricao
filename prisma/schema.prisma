@@ -11,90 +11,93 @@ datasource db {
 }
 
 model Course {
-  id String @id @default(uuid())
-  name String
-  short_name String
-  course_class CourseClass[]  
-  created_at DateTime @default(now())
+  id           String        @id @default(uuid())
+  name         String
+  short_name   String        @unique
+  course_class CourseClass[]
+  created_at   DateTime      @default(now())
 }
 
 model Institution {
-  id String @id @default(uuid())
-  name String
-  short_name String
+  id           String        @id @default(uuid())
+  name         String
+  short_name   String        @unique
   course_class CourseClass[]
-  created_at DateTime @default(now())
-} 
+  created_at   DateTime      @default(now())
+}
 
 model CourseClass {
-  id String @id @default(uuid())
-  course_id String
-  course Course @relation(fields: [course_id], references: [id])
+  id             String       @id @default(uuid())
+  course_id      String
+  course         Course       @relation(fields: [course_id], references: [id])
   institution_id String
-  institution Institution @relation(fields: [institution_id], references: [id])
-  enrollment Enrollment[]
-  created_at DateTime @default(now())
+  institution    Institution  @relation(fields: [institution_id], references: [id])
+  description    String
+  enrollment     Enrollment[]
+  created_at     DateTime     @default(now())
+
+  @@unique([course_id, institution_id, description])
 }
 
 model Student {
-  id String @id @default(uuid())
-  name String
-  email String
-  cpf String
+  id         String       @id @default(uuid())
+  name       String
+  email      String       @unique
+  cpf        String       @unique
   enrollment Enrollment[]
-  created_at DateTime @default(now())
+  created_at DateTime     @default(now())
 }
 
 model Enrollment {
-  id String @id @default(uuid())
-  student_id String
-  student Student @relation(fields: [student_id], references: [id])
-  course_class_id String
-  course_class CourseClass @relation(fields: [course_class_id],references: [id])
+  id                String             @id @default(uuid())
+  student_id        String
+  student           Student            @relation(fields: [student_id], references: [id])
+  course_class_id   String
+  course_class      CourseClass        @relation(fields: [course_class_id], references: [id])
   enrollment_status EnrollmentStatus[]
-  created_at DateTime @default(now())
+  created_at        DateTime           @default(now())
 }
 
 // 0: john-doe/waiting, 1: john-doe/confirmed, 2: john-doe/active
 model EnrollmentStatus {
-  id String @id @default(uuid())
-  enrollment_id String
-  enrollmend Enrollment @relation(fields: [enrollment_id], references: [id])
+  id                        String               @id @default(uuid())
+  enrollment_id             String
+  enrollmend                Enrollment           @relation(fields: [enrollment_id], references: [id])
   enrollment_status_type_id String
-  enrollment_status_type EnrollmentStatusType @relation(fields: [enrollment_status_type_id], references: [id])
-  created_at DateTime @default(now())
+  enrollment_status_type    EnrollmentStatusType @relation(fields: [enrollment_status_type_id], references: [id])
+  created_at                DateTime             @default(now())
 }
 
 // 0: sent, 1: confirmed, 2: active, 3: finished
 model EnrollmentStatusType {
-  id String @id @default(uuid())
-  name String
+  id                String             @id @default(uuid())
+  name              String
   enrollment_status EnrollmentStatus[]
-  created_at DateTime @default(now())
+  created_at        DateTime           @default(now())
 }
 
 model Administrator {
-  id String @id @default(uuid())
-  name String
-  email String
+  id    String @id @default(uuid())
+  name  String
+  email String @unique
 }
 
 //
 // next-auth-prisma
 // 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

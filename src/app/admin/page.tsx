@@ -1,8 +1,7 @@
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
 import NextAuthProvider from "../providers/auth";
-import UserAuthAction from "@/components/UserAuthAction";
-import { useState } from "react";
+import UserAuthBar from "@/components/UserAuthBar";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração",
@@ -31,7 +30,7 @@ export default async function AdminPage() {
   return (
     <NextAuthProvider>
       <div className="container mx-auto p-4">
-        <UserAuthAction />
+        <UserAuthBar />
         <h2>Cursos</h2>
         {courses.map((item) => {
           return (
