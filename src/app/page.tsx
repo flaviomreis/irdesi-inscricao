@@ -1,6 +1,5 @@
 "use client";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,9 +33,6 @@ const userEnrollmentFormSchema = z.object({
 type UserEnrollmentFormData = z.infer<typeof userEnrollmentFormSchema>;
 
 export default function Home() {
-  const params = useSearchParams();
-  const courseClass = params.get("course_class");
-
   const {
     register,
     handleSubmit,
@@ -60,9 +56,7 @@ export default function Home() {
       />
 
       <p className="font-base text-xl">Pré-Inscrição para o Curso:</p>
-      <p className="text-violet-800 text-xl text-center">
-        Práticas Inclusivas para Atendimento a Alunos com TEA
-      </p>
+      <p className="text-violet-800 text-xl text-center">TEA-1</p>
 
       <form
         onSubmit={handleSubmit(userEnrollment)}

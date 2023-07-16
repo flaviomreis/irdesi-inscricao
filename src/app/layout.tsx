@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Amaranth, Inter } from "next/font/google";
+import { Amaranth } from "next/font/google";
 
 const appFont = Amaranth({
   weight: ["400", "700"],

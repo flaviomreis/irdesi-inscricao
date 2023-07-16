@@ -6,8 +6,8 @@ export default function UserAuthBar() {
   const { data, status } = useSession();
   return (
     <div className="flex justify-between items-center border-b border-gray-400">
-      {status === "unauthenticated" ? (
-        <div className="flex items-center justify-between w-full">
+      {status === "unauthenticated" && (
+        <div className="flex items-center justify-between w-full h-10">
           <div>Área de Administração</div>
           <button
             onClick={() => signIn()}
@@ -16,12 +16,25 @@ export default function UserAuthBar() {
             Entrar
           </button>
         </div>
-      ) : (
-        <div className="flex items-center justify-between w-full">
+      )}
+
+      {status === "loading" && (
+        <div className="flex items-center h-10 text-purple-800">
+          Obtendo informações do(a) usuário(a)
+        </div>
+      )}
+
+      {status === "authenticated" && (
+        <div className="flex items-center justify-between w-full h-10">
           <div className="flex items-center gap-2">
             Área do Administrador(a):
             <span className="text-purple-800">{data?.user?.name}</span>
-            <img src={data?.user?.image ?? ""} width={32} alt="{data?.user?.name}" className="rounded-full"/>
+            <img
+              src={data?.user?.image ?? ""}
+              width={32}
+              alt="{data?.user?.name}"
+              className="rounded-full"
+            />
           </div>
           <button
             onClick={() => signOut()}
