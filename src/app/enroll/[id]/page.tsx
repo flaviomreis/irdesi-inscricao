@@ -14,7 +14,7 @@ export default async function Enroll({ params }: { params: { id: string } }) {
   });
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-2 break-words mx-auto px-4 first-letter: w-full max-w-lg">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-2 break-words mx-auto px-4 max-w-lg">
       <Image
         src="/logo-v2.png"
         alt="Logo Campi-Irdesi"
@@ -29,11 +29,13 @@ export default async function Enroll({ params }: { params: { id: string } }) {
         </p>
       ) : (
         <>
-          <p className="text-lg text-center text-orange-700">
+          <p className="text-lg text-center text-orange-700 w-full">
             Contrato: {courseClass?.institution?.short_name}
           </p>
-          <p className="text-center">Pré-Inscrição para o Curso</p>
-          <p className="text-violet-800 text-base text-center">
+          <p className="text-base text-center w-full">
+            Pré-Inscrição para o Curso
+          </p>
+          <p className="text-violet-800 text-base text-center w-full">
             {courseClass?.course?.name} ({courseClass?.description})
           </p>
           <EnrollmentForm />

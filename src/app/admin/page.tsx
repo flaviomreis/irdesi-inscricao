@@ -6,8 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 
 export const metadata: Metadata = {
-  title: "Irdesi - Administração",
-  description: "Administração de Pré-Inscrições",
+  title: "Irdesi - Administração de Pré-Inscrições",
 };
 
 async function getCourses() {
@@ -76,7 +75,7 @@ export default async function AdminPage() {
             })}
           </>
         ) : (
-          ""
+          "Área restrita para administradores de pré-inscrição."
         )}
       </div>
     </NextAuthProvider>
