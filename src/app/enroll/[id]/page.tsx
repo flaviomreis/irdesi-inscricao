@@ -14,7 +14,7 @@ export default async function Enroll({ params }: { params: { id: string } }) {
   });
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-2 break-words mx-auto px-4 max-w-lg">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-2 break-words mx-auto px-4 max-w-xs">
       <Image
         src="/logo-v2.png"
         alt="Logo Campi-Irdesi"
