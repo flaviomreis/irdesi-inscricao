@@ -1,7 +1,16 @@
 import { prisma } from "@/db/connection";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
-  const courseClasses = await prisma.courseClass.findMany();
-  return NextResponse.json(courseClasses);
+export async function GET(request: NextRequest) {
+  const id = request.nextUrl.searchParams.get("id");
+  const courseClass = await prisma.courseClass.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      course: true,
+      institution: true,
+    },
+  });
+  return NextResponse.json(courseClass);
 }
