@@ -2,6 +2,14 @@ import Image from "next/image";
 import { prisma } from "@/db/connection";
 import EnrollmentForm from "@/components/EnrollmentForm";
 
+// async function getCourseClasses() {
+//   const result = await fetch("http://localhost:3000/api/courseclasses/", {
+//     cache: "no-store",
+//   });
+
+//   return result;
+// }
+
 export default async function Enroll({ params }: { params: { id: string } }) {
   const courseClass = await prisma.courseClass.findUnique({
     where: {
@@ -12,6 +20,8 @@ export default async function Enroll({ params }: { params: { id: string } }) {
       institution: true,
     },
   });
+
+  //console.log(await getCourseClasses());
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-2 break-words mx-auto px-4 max-w-lg">
