@@ -22,6 +22,7 @@ model Institution {
   id           String        @id @default(uuid())
   name         String
   short_name   String        @unique
+  uf String
   course_class CourseClass[]
   created_at   DateTime      @default(now())
 }
@@ -35,6 +36,7 @@ model CourseClass {
   description    String
   enrollment     Enrollment[]
   created_at     DateTime     @default(now())
+  requireemployeeId Boolean @default(false)
 
   @@unique([course_id, institution_id, description])
 }
@@ -44,6 +46,7 @@ model Student {
   name       String
   email      String       @unique
   cpf        String       @unique
+  employeeId String?
   enrollment Enrollment[]
   created_at DateTime     @default(now())
 }
