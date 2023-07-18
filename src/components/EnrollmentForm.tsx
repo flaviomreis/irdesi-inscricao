@@ -6,7 +6,11 @@ import { userEnrollmentFormSchema } from "@/dao/UserEnrollmentFormSchema";
 
 type UserEnrollmentFormData = z.infer<typeof userEnrollmentFormSchema>;
 
-export default function EnrollmentForm() {
+type Props = {
+  requireEmployeeId: boolean;
+};
+
+export default function EnrollmentForm(props: Props) {
   const {
     register,
     handleSubmit,
@@ -18,6 +22,8 @@ export default function EnrollmentForm() {
   function userEnrollment(data: UserEnrollmentFormData) {
     console.log(data);
   }
+
+  console.log(props);
 
   return (
     <form
@@ -39,7 +45,7 @@ export default function EnrollmentForm() {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="email">
-          Email{" "}
+          Email
           <span className="text-xs">
             (para envio da senha de acesso ao EaD)
           </span>
@@ -54,6 +60,18 @@ export default function EnrollmentForm() {
           <span className="text-xs text-red-500">{errors.email.message}</span>
         )}
       </div>
+
+      {props.requireEmployeeId && (
+        <div className="flex flex-col gap-1">
+          <label htmlFor="matricula">Matrícula</label>
+          <input
+            type="text"
+            placeholder="número da matrícula"
+            {...register("employeedId")}
+            className="border border-zinc-200 shadow-sm rounded h-10 px-3"
+          />
+        </div>
+      )}
 
       <div className="flex flex-col gap-1">
         <label htmlFor="cpf">

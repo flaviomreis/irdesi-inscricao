@@ -18,6 +18,7 @@ export const userEnrollmentFormSchema = z.object({
     .email("Este email é inválido")
     .toLowerCase()
     .trim(),
+  employeedId: z.string().trim(),
   cpf: z
     .string()
     .trim()
