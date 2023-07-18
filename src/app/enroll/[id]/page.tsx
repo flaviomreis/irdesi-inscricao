@@ -2,12 +2,10 @@ import Image from "next/image";
 import EnrollmentForm from "@/components/EnrollmentForm";
 
 async function getCourseClass(id: string) {
-  const result = await fetch(
-    "http://localhost:3000/api/courseclasses?id=" + id,
-    {
-      cache: "no-store",
-    }
-  );
+  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL;
+  const result = await fetch(`/api/courseclasses?${id}=" + id`, {
+    cache: "no-store",
+  });
 
   return result.json();
 }
