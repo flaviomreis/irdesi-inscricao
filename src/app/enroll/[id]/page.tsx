@@ -13,11 +13,7 @@ async function getCourseClass(id: string) {
 }
 
 export default async function Enroll({ params }: { params: { id: string } }) {
-  //const courseClass = await getCourseClass(params.id);
-  const courseClass = await getCourseClass(
-    "4d80b4fe-25a0-11ee-8c33-076be743b906"
-  );
-  // console.log(courseClass);
+  const courseClass = await getCourseClass(params.id);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-2 break-words mx-auto px-4 max-w-lg">
