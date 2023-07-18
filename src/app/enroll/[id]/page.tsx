@@ -3,7 +3,7 @@ import EnrollmentForm from "@/components/EnrollmentForm";
 
 async function getCourseClass(id: string) {
   const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL;
-  const result = await fetch("/api/courseclasses?id=" + id, {
+  const result = await fetch(`${baseUrl}/api/courseclasses/${id}`, {
     cache: "no-store",
   });
 

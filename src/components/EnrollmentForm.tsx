@@ -23,8 +23,6 @@ export default function EnrollmentForm(props: Props) {
     console.log(data);
   }
 
-  console.log(props);
-
   return (
     <form
       onSubmit={handleSubmit(userEnrollment)}
