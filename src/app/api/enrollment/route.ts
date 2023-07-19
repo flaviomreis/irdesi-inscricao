@@ -6,10 +6,12 @@ export async function POST(request: NextRequest) {
   const courseClassId = body.courseClassId;
 
   if (!courseClassId) {
-    return NextResponse.json(body, {
-      status: 401,
-      statusText: `Um id de turma precisa ser enviado.`,
-    });
+    return NextResponse.json(
+      { error: "`Um id de turma precisa ser enviado." },
+      {
+        status: 401,
+      }
+    );
   }
 
   const foundCourseClass = await prisma.courseClass.findUnique({
@@ -19,37 +21,45 @@ export async function POST(request: NextRequest) {
   });
 
   if (!foundCourseClass) {
-    return NextResponse.json(body, {
-      status: 401,
-      statusText: `A turma ${courseClassId} não existe.`,
-    });
+    return NextResponse.json(
+      { error: `A turma ${courseClassId} não existe.` },
+      {
+        status: 401,
+      }
+    );
   }
 
   const studentEmail = body.student.email;
 
   if (!studentEmail) {
-    return NextResponse.json(body, {
-      status: 401,
-      statusText: `O email não pode ser em branco.`,
-    });
+    return NextResponse.json(
+      { error: "`O email não pode ser em branco." },
+      {
+        status: 401,
+      }
+    );
   }
 
   const studentName = body.student.name;
 
   if (!studentName) {
-    return NextResponse.json(body, {
-      status: 401,
-      statusText: `O nome não pode ser em branco.`,
-    });
+    return NextResponse.json(
+      { error: "`O nome não pode ser em branco." },
+      {
+        status: 401,
+      }
+    );
   }
 
   const studentCPF = body.student.cpf;
 
   if (!studentCPF) {
-    return NextResponse.json(body, {
-      status: 401,
-      statusText: `O CPF não pode ser em branco.`,
-    });
+    return NextResponse.json(
+      { error: "`O CPF não pode ser em branco." },
+      {
+        status: 401,
+      }
+    );
   }
 
   const foundStudentByEmail = await prisma.student.findUnique({
@@ -59,10 +69,12 @@ export async function POST(request: NextRequest) {
   });
 
   if (foundStudentByEmail && foundStudentByEmail.cpf !== studentCPF) {
-    return NextResponse.json(body, {
-      status: 401,
-      statusText: `Email ${studentEmail} vinculado a outro CPF.`,
-    });
+    return NextResponse.json(
+      { error: `Email ${studentEmail} vinculado a outro CPF.` },
+      {
+        status: 401,
+      }
+    );
   }
 
   const foundStudentByCPF = await prisma.student.findUnique({
@@ -72,10 +84,12 @@ export async function POST(request: NextRequest) {
   });
 
   if (foundStudentByCPF && foundStudentByCPF.email !== studentEmail) {
-    return NextResponse.json(body, {
-      status: 401,
-      statusText: `CPF ${studentCPF} vinculado a outro email.`,
-    });
+    return NextResponse.json(
+      { error: `CPF ${studentCPF} vinculado a outro email.` },
+      {
+        status: 401,
+      }
+    );
   }
 
   if (!foundStudentByEmail) {
@@ -106,10 +120,12 @@ export async function POST(request: NextRequest) {
   });
 
   if (!student) {
-    return NextResponse.json(body, {
-      status: 500,
-      statusText: `Falha ao pré-inscrever ${studentEmail}.`,
-    });
+    return NextResponse.json(
+      { error: `Falha ao pré-inscrever ${studentEmail}.` },
+      {
+        status: 500,
+      }
+    );
   }
 
   const foundEnrollment = await prisma.enrollment.findUnique({
@@ -122,10 +138,14 @@ export async function POST(request: NextRequest) {
   });
 
   if (foundEnrollment) {
-    return NextResponse.json(body, {
-      status: 401,
-      statusText: `Estudante ${studentEmail} já tem pré-inscrição nesta turma.`,
-    });
+    return NextResponse.json(
+      {
+        error: `Estudante ${studentEmail} já tem pré-inscrição nesta turma.`,
+      },
+      {
+        status: 401,
+      }
+    );
   }
 
   const enrollment = await prisma.enrollment.create({
@@ -135,7 +155,10 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return NextResponse.json({
-    statusText: `Pré-inscrição enviada com sucesso. Por favor, aguarde confirmação.`,
-  });
+  return NextResponse.json(
+    {
+      error: `Pré-inscrição enviada com sucesso. Por favor, aguarde confirmação.`,
+    },
+    { status: 201 }
+  );
 }

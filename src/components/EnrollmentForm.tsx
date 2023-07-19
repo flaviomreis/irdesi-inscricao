@@ -34,13 +34,8 @@ export default function EnrollmentForm(props: Props) {
         student: data,
       }),
     });
-
-    if (!result.ok) {
-      setEnrollmentError(result.statusText);
-    } else {
-      const json = await result.json();
-      setEnrollmentError(json.statusText);
-    }
+    const json = await result.json();
+    setEnrollmentError(json.error);
   }
 
   return (
