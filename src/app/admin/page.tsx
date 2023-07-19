@@ -1,83 +1,39 @@
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
-import NextAuthProvider from "../providers/auth";
-import UserAuthBar from "@/components/UserAuthBar";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração de Pré-Inscrições",
 };
 
-async function getCourses() {
-  const courses = await prisma.course.findMany({});
-  return courses;
-}
-
-async function getCourseClasses() {
-  const courseClasses = await prisma.courseClass.findMany({
-    include: {
-      course: true,
-      institution: true,
-    },
+async function getInstitutions() {
+  const result = await prisma.institution.findMany({
+    orderBy: [
+      {
+        short_name: "asc",
+      },
+    ],
   });
-  return courseClasses;
-}
-
-async function isAdministrator(
-  email: string | undefined | null
-): Promise<boolean> {
-  if (!email) return false;
-  const administrator = await prisma.administrator.findUnique({
-    where: {
-      email,
-    },
-  });
-  if (!administrator) return false;
-  return true;
+  return result;
 }
 
 export default async function AdminPage() {
-  const courses = await getCourses();
-  const courseClasses = await getCourseClasses();
-  const session = await getServerSession(authOptions);
+  const institutions = await getInstitutions();
 
   return (
-    <NextAuthProvider>
-      <div className="container mx-auto p-4">
-        <UserAuthBar />
-        {(await isAdministrator(session?.user?.email)) ? (
-          <>
-            <h2>Cursos</h2>
-            {courses.map((item) => {
-              return (
-                <p key={item.id}>
-                  {item.name}
-                  {" : "}
-                  {item.short_name}
-                </p>
-              );
-            })}
-
-            <h2>Turmas</h2>
-            {courseClasses.map((item) => {
-              return (
-                <p key={item.id}>
-                  {item.course.name}
-                  {" : "}
-                  {item.course.short_name}
-                  {" / "}
-                  {item.institution.name}
-                  {" : "}
-                  {item.institution.short_name}
-                </p>
-              );
-            })}
-          </>
-        ) : (
-          "Área restrita para administradores de pré-inscrição."
-        )}
-      </div>
-    </NextAuthProvider>
+    <div className="flex flex-col gap-2">
+      <h2>Contratos</h2>
+      <ul className="list-disc pl-4 gap-2 flex flex-col">
+        {institutions.map((institution) => {
+          return (
+            <li key={institution.id}>
+              <Link href={`/admin/institution/${institution.id}`}>
+                {institution.short_name}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

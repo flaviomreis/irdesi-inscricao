@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn, signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function UserAuthBar() {
   const { data, status } = useSession();
@@ -8,7 +9,7 @@ export default function UserAuthBar() {
     <div className="flex justify-between items-center border-b border-gray-400">
       {status === "unauthenticated" && (
         <div className="flex items-center justify-between w-full h-10">
-          <div>Área de Administração</div>
+          Área de Administração
           <button
             onClick={() => signIn()}
             className="bg-purple-800 font-bold text-sm rounded text-white p-2 px-4 hover:bg-purple-600"
@@ -27,7 +28,7 @@ export default function UserAuthBar() {
       {status === "authenticated" && (
         <div className="flex items-center justify-between w-full h-10">
           <div className="flex items-center gap-2">
-            Área do Administrador(a):
+            <Link href={"/admin"}>Área do Administrador(a):</Link>
             <span className="text-purple-800">{data?.user?.name}</span>
             <img
               src={data?.user?.image ?? ""}

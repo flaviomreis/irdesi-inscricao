@@ -135,8 +135,6 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  console.log({ foundCourseClass, student, enrollment });
-
   return NextResponse.json({
     statusText: `Pré-inscrição enviada com sucesso. Por favor, aguarde confirmação.`,
   });
