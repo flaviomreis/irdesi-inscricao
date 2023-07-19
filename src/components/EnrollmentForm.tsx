@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { EnrollmentFormSchema } from "@/schema/EnrollmentFormSchema";
 import { baseUrl } from "@/utils/baseurl";
+import { useState } from "react";
 
 type Props = {
   courseClassId: string;
@@ -20,6 +21,8 @@ export default function EnrollmentForm(props: Props) {
     resolver: zodResolver(EnrollmentFormSchema),
   });
 
+  const [enrollmentError, setEnrollmentError] = useState<string>("");
+
   async function userEnrollment(data: UserEnrollmentFormData) {
     const result = await fetch(`${baseUrl}/api/enrollment/`, {
       method: "POST",
@@ -33,10 +36,10 @@ export default function EnrollmentForm(props: Props) {
     });
 
     if (!result.ok) {
-      alert(result.statusText);
+      setEnrollmentError(result.statusText);
     } else {
       const json = await result.json();
-      alert(json.statusText);
+      setEnrollmentError(json.statusText);
     }
   }
 
@@ -90,6 +93,10 @@ export default function EnrollmentForm(props: Props) {
           <span className="text-xs text-red-500">{errors.cpf.message}</span>
         )}
       </div>
+
+      {!!enrollmentError && (
+        <div className="text-red-500">{enrollmentError}</div>
+      )}
 
       <button
         type="submit"

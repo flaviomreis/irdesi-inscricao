@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
   if (!studentEmail) {
     return NextResponse.json(body, {
       status: 401,
-      statusText: `O email do estudante não pode ser em branco.`,
+      statusText: `O email não pode ser em branco.`,
     });
   }
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
   if (!studentName) {
     return NextResponse.json(body, {
       status: 401,
-      statusText: `O nome do estudante não pode ser em branco.`,
+      statusText: `O nome não pode ser em branco.`,
     });
   }
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   if (!studentCPF) {
     return NextResponse.json(body, {
       status: 401,
-      statusText: `O CPF do estudante não pode ser em branco.`,
+      statusText: `O CPF não pode ser em branco.`,
     });
   }
 
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
   if (foundStudentByEmail && foundStudentByEmail.cpf !== studentCPF) {
     return NextResponse.json(body, {
       status: 401,
-      statusText: `O email ${studentEmail} já está cadastrado com outro CPF.`,
+      statusText: `Email ${studentEmail} vinculado a outro CPF.`,
     });
   }
 
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
   if (foundStudentByCPF && foundStudentByCPF.email !== studentEmail) {
     return NextResponse.json(body, {
       status: 401,
-      statusText: `O CPF ${studentCPF} já está cadastrado com outro email.`,
+      statusText: `CPF ${studentCPF} vinculado a outro email.`,
     });
   }
 
@@ -84,6 +84,16 @@ export async function POST(request: NextRequest) {
         name: studentName,
         email: studentEmail,
         cpf: studentCPF,
+        employeeId: body.student.employeeId,
+      },
+    });
+  } else {
+    await prisma.student.update({
+      where: {
+        id: foundStudentByEmail.id,
+      },
+      data: {
+        name: studentName,
         employeeId: body.student.employeeId,
       },
     });
@@ -98,7 +108,7 @@ export async function POST(request: NextRequest) {
   if (!student) {
     return NextResponse.json(body, {
       status: 500,
-      statusText: `Não foi possível inserir o estudante ${studentEmail}.`,
+      statusText: `Falha ao pré-inscrever ${studentEmail}.`,
     });
   }
 
@@ -114,7 +124,7 @@ export async function POST(request: NextRequest) {
   if (foundEnrollment) {
     return NextResponse.json(body, {
       status: 401,
-      statusText: `O estudante ${studentEmail} já está pré-inscrito na turma.`,
+      statusText: `Estudante ${studentEmail} já tem pré-inscrição nesta turma.`,
     });
   }
 

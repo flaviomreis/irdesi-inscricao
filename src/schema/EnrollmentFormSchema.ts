@@ -1,16 +1,7 @@
 import { z } from "zod";
 import isValidCPF from "@/utils/cpf-validator";
 
-const name = z
-  .string()
-  .nonempty("O nome é obrigatório")
-  .transform((name) => {
-    return name
-      .trim()
-      .split(" ")
-      .map((word) => word[0].toLocaleUpperCase().concat(word.substring(1)))
-      .join(" ");
-  });
+const name = z.string().nonempty("O nome é obrigatório").trim();
 
 const email = z
   .string()
