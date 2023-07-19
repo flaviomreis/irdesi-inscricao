@@ -49,6 +49,8 @@ model Student {
   employeeId String?
   enrollment Enrollment[]
   created_at DateTime     @default(now())
+
+  @@unique(fields: [email, cpf], name: "student")
 }
 
 model Enrollment {
@@ -59,6 +61,8 @@ model Enrollment {
   course_class      CourseClass        @relation(fields: [course_class_id], references: [id])
   enrollment_status EnrollmentStatus[]
   created_at        DateTime           @default(now())
+
+  @@unique(fields: [course_class_id, student_id], name: "enrollment")
 }
 
 // 0: john-doe/waiting, 1: john-doe/confirmed, 2: john-doe/active

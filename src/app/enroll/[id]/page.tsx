@@ -1,10 +1,9 @@
 import Image from "next/image";
 import EnrollmentForm from "@/components/EnrollmentForm";
+import EnrollmentWithEmployeeIdForm from "@/components/EnrollmentWithEmployeeIdForm";
+import { baseUrl } from "@/utils/baseurl";
 
 async function getCourseClass(id: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-    : "http://localhost:3000";
   const result = await fetch(`${baseUrl}/api/courseclasses/${id}`, {
     cache: "no-store",
   });
@@ -40,7 +39,11 @@ export default async function Enroll({ params }: { params: { id: string } }) {
           <p className="text-violet-800 text-base text-center w-full">
             {courseClass?.course?.name} ({courseClass?.description})
           </p>
-          <EnrollmentForm requireEmployeeId={courseClass?.requireemployeeId} />
+          {!courseClass?.requireemployeeId ? (
+            <EnrollmentForm courseClassId={courseClass.id} />
+          ) : (
+            <EnrollmentWithEmployeeIdForm courseClassId={courseClass.id} />
+          )}
         </>
       )}
     </div>

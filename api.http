@@ -1,0 +1,40 @@
+###
+POST http://localhost:3000/api/enrollment/
+Content-Type: application/json
+
+{
+  "courseClassId": "9009d9a2-235e-11ee-b374-2f0d658edfcd",
+  "student": {
+    "name": "c",
+    "email": "c",
+    "employeeId": "3",
+    "cpf": "3"
+  }
+}
+###
+POST http://localhost:3000/api/enrollment/
+Content-Type: application/json
+
+{
+  "courseClassId": "4d80b4fe-25a0-11ee-8c33-076be743b906",
+  "student": {
+    "name": "c",
+    "email": "c",
+    "employeeId": "3",
+    "cpf": "3"
+  }
+}
+
+###
+POST http://localhost:3000/api/enrollment/
+Content-Type: application/json
+
+{
+  "courseClassId": "4d80b4fe-25a0-11ee-8c33-076be743b906",
+  "student": {
+    "name": "d",
+    "email": "d",
+    "employeeId": "4",
+    "cpf": "4"
+  }
+}

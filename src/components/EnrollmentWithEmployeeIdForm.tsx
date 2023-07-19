@@ -2,22 +2,24 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { EnrollmentFormSchema } from "@/schema/EnrollmentFormSchema";
+import { EnrollmentWithEmployeeIdFormSchema } from "@/schema/EnrollmentFormSchema";
 import { baseUrl } from "@/utils/baseurl";
 
 type Props = {
   courseClassId: string;
 };
 
-export default function EnrollmentForm(props: Props) {
-  type UserEnrollmentFormData = z.infer<typeof EnrollmentFormSchema>;
+export default function EnrollmentWithEmployeeIdForm(props: Props) {
+  type UserEnrollmentFormData = z.infer<
+    typeof EnrollmentWithEmployeeIdFormSchema
+  >;
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<UserEnrollmentFormData>({
-    resolver: zodResolver(EnrollmentFormSchema),
+    resolver: zodResolver(EnrollmentWithEmployeeIdFormSchema),
   });
 
   async function userEnrollment(data: UserEnrollmentFormData) {
@@ -31,13 +33,8 @@ export default function EnrollmentForm(props: Props) {
         student: data,
       }),
     });
-
-    if (!result.ok) {
-      alert(result.statusText);
-    } else {
-      const json = await result.json();
-      alert(json.statusText);
-    }
+    const json = await result.json();
+    console.log(json);
   }
 
   return (
@@ -73,6 +70,21 @@ export default function EnrollmentForm(props: Props) {
         />
         {errors.email && (
           <span className="text-xs text-red-500">{errors.email.message}</span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="matricula">Matrícula</label>
+        <input
+          type="text"
+          placeholder="sua matrícula de servidor"
+          {...register("employeeId")}
+          className="border border-zinc-200 shadow-sm rounded h-10 px-3"
+        />
+        {errors.employeeId && (
+          <span className="text-xs text-red-500">
+            {errors.employeeId.message}
+          </span>
         )}
       </div>
 
