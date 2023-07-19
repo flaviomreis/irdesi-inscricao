@@ -16,7 +16,7 @@ export default function EnrollmentForm(props: Props) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<UserEnrollmentFormData>({
     resolver: zodResolver(EnrollmentFormSchema),
   });
@@ -94,10 +94,11 @@ export default function EnrollmentForm(props: Props) {
       )}
 
       <button
+        disabled={isSubmitting}
         type="submit"
         className="bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
       >
-        Enviar
+        {isSubmitting ? "Enviando" : "Enviar"}
       </button>
     </form>
   );
