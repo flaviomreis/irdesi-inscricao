@@ -37,12 +37,8 @@ export default function EnrollmentWithEmployeeIdForm(props: Props) {
       }),
     });
 
-    if (!result.ok) {
-      setEnrollmentError(result.statusText);
-    } else {
-      const json = await result.json();
-      setEnrollmentError(json.statusText);
-    }
+    const json = await result.json();
+    setEnrollmentError(json.error);
   }
 
   return (
