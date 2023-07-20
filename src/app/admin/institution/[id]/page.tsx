@@ -1,3 +1,4 @@
+import CopyToClipboardButton from "@/components/CopyToClipboardButton";
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -37,10 +38,14 @@ export default async function AdminInstitutionPage({
       <ul className="list-disc pl-4 gap-2 flex flex-col">
         {institution?.course_class.map((courseClass) => {
           return (
-            <li key={courseClass.id}>
+            <li
+              key={courseClass.id}
+              className="flex item-center justify-between"
+            >
               <Link href={`/admin/courseclass/${courseClass.id}`}>
                 {courseClass.course.short_name} ({courseClass.description})
               </Link>
+              <CopyToClipboardButton id={courseClass.id} />
             </li>
           );
         })}
