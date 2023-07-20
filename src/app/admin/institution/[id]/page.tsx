@@ -42,7 +42,10 @@ export default async function AdminInstitutionPage({
               key={courseClass.id}
               className="flex item-center justify-between"
             >
-              <Link href={`/admin/courseclass/${courseClass.id}`}>
+              <Link
+                href={`/admin/courseclass/${courseClass.id}`}
+                className="flex items-center"
+              >
                 {courseClass.course.short_name} ({courseClass.description})
               </Link>
               <CopyToClipboardButton id={courseClass.id} />
