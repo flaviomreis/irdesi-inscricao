@@ -2,6 +2,7 @@ import { z } from "zod";
 import isValidCPF from "@/utils/cpf-validator";
 
 const name = z.string().nonempty("O nome é obrigatório").trim();
+const lastName = z.string().nonempty("O sobrenome é obrigatório").trim();
 
 const email = z
   .string()
@@ -21,12 +22,14 @@ const cpf = z
 
 export const EnrollmentFormSchema = z.object({
   name,
+  lastName,
   email,
   cpf,
 });
 
 export const EnrollmentWithEmployeeIdFormSchema = z.object({
   name,
+  lastName,
   email,
   employeeId,
   cpf,

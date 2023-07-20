@@ -44,6 +44,7 @@ model CourseClass {
 model Student {
   id         String       @id @default(uuid())
   name       String
+  last_name  String
   email      String       @unique
   cpf        String       @unique
   employeeId String?

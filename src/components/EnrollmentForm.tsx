@@ -47,12 +47,27 @@ export default function EnrollmentForm(props: Props) {
         <label htmlFor="name">Nome</label>
         <input
           type="text"
-          placeholder="Seu nome completo"
+          placeholder="Seu nome"
           {...register("name")}
           className="border border-zinc-200 shadow-sm rounded h-10 px-3"
         />
         {errors.name && (
           <span className="text-xs text-red-500">{errors.name.message}</span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="lastName">Sobrenome</label>
+        <input
+          type="text"
+          placeholder="Seu sobrenome"
+          {...register("lastName")}
+          className="border border-zinc-200 shadow-sm rounded h-10 px-3"
+        />
+        {errors.lastName && (
+          <span className="text-xs text-red-500">
+            {errors.lastName.message}
+          </span>
         )}
       </div>
 

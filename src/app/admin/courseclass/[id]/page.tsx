@@ -38,16 +38,33 @@ export default async function AdminCourseClassPage({
       <h2>
         Turma: {courseClass?.course.short_name} ({courseClass?.description})
       </h2>
-      <ul className="list-disc pl-4 gap-2 flex flex-col">
-        {courseClass?.enrollment.map((enrollment) => {
-          return (
-            <li key={enrollment.id}>
-              {enrollment.student.name},{enrollment.student.email},
-              {enrollment.student.cpf}
-            </li>
-          );
-        })}
-      </ul>
+      <h2>Estudantes</h2>
+      <table className="table-auto text-left">
+        <thead>
+          <th>CPF</th>
+          <th>email</th>
+          <th>Nome</th>
+          <th>Sobrenome</th>
+        </thead>
+        <tbody>
+          {courseClass?.enrollment.map((enrollment) => {
+            return (
+              <tr key={enrollment.id}>
+                <td>{enrollment.student.cpf}</td>
+                <td>{enrollment.student.email}</td>
+                <td>{enrollment.student.name}</td>
+                <td>{enrollment.student.last_name}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <Link
+        href={`/api/download/${courseClassId}`}
+        className="flex items-center justify-center bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
+      >
+        Download
+      </Link>
     </div>
   );
 }

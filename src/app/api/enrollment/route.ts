@@ -5,6 +5,8 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const courseClassId = body.courseClassId;
 
+  console.log(body.student);
+
   if (!courseClassId) {
     return NextResponse.json(
       { error: "`Um id de turma precisa ser enviado." },
@@ -45,6 +47,17 @@ export async function POST(request: NextRequest) {
   if (!studentName) {
     return NextResponse.json(
       { error: "`O nome não pode ser em branco." },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const studentLastName = body.student.lastName;
+
+  if (!studentLastName) {
+    return NextResponse.json(
+      { error: "`O sobrenome não pode ser em branco." },
       {
         status: 401,
       }
@@ -96,6 +109,7 @@ export async function POST(request: NextRequest) {
     await prisma.student.create({
       data: {
         name: studentName,
+        last_name: studentLastName,
         email: studentEmail,
         cpf: studentCPF,
         employeeId: body.student.employeeId,
