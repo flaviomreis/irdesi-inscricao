@@ -8,7 +8,7 @@ export default function UserAuthBar() {
   return (
     <div className="flex justify-between items-center border-b border-gray-400">
       {status === "unauthenticated" && (
-        <div className="flex items-center justify-between w-full h-10">
+        <div className="flex items-center justify-between w-full">
           Área de Administração
           <button
             onClick={() => signIn()}
@@ -26,7 +26,7 @@ export default function UserAuthBar() {
       )}
 
       {status === "authenticated" && (
-        <div className="flex items-center justify-between w-full h-10">
+        <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <Link href={"/admin"}>Área do Administrador(a):</Link>
             <span className="text-purple-800">{data?.user?.name}</span>
