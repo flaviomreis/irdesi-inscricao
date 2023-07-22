@@ -1,7 +1,6 @@
 import CopyToClipboardButton from "@/components/CopyToClipboardButton";
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração de Pré-Inscrições",

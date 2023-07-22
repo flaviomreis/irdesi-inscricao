@@ -145,7 +145,7 @@ export default function EnrollmentWithEmployeeIdForm(props: Props) {
             href={`/admin/courseclass/${props.courseClassId}`}
             className="flex items-center px-4 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
           >
-            Cancelar
+            Voltar
           </a>
           <a
             href={`/admin/courseclass/${props.courseClassId}`}
