@@ -1,6 +1,5 @@
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração de Pré-Inscrições",
@@ -27,9 +26,9 @@ export default async function AdminPage() {
         {institutions.map((institution) => {
           return (
             <li key={institution.id}>
-              <Link href={`/admin/institution/${institution.id}`}>
+              <a href={`/admin/institution/${institution.id}`}>
                 {institution.short_name}
-              </Link>
+              </a>
             </li>
           );
         })}

@@ -53,9 +53,9 @@ export default async function AdminCourseClassPage({
             return (
               <tr key={enrollment.id}>
                 <td>
-                  <Link href={`/admin/enrollment/${enrollment.id}`}>
+                  <a href={`/admin/enrollment/${enrollment.id}`}>
                     {enrollment.student.cpf}
-                  </Link>
+                  </a>
                 </td>
                 <td>{enrollment.student.email}</td>
                 <td>{enrollment.student.name}</td>

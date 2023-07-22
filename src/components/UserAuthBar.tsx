@@ -1,7 +1,6 @@
 "use client";
 
 import { signIn, signOut, useSession } from "next-auth/react";
-import Link from "next/link";
 
 export default function UserAuthBar() {
   const { data, status } = useSession();
@@ -28,7 +27,7 @@ export default function UserAuthBar() {
       {status === "authenticated" && (
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
-            <Link href={"/admin"}>Área do Administrador(a):</Link>
+            <a href={"/admin"}>Área do Administrador(a):</a>
             <span className="text-purple-800">{data?.user?.name}</span>
             <img
               src={data?.user?.image ?? ""}

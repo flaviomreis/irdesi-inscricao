@@ -126,18 +126,18 @@ export default function EnrollmentForm(props: Props) {
 
       {props.method === "PUT" && (
         <div className="flex items-center justify-between">
-          <Link
+          <a
             href={`/admin/courseclass/${props.courseClassId}`}
             className="flex items-center px-4 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
           >
             Cancelar
-          </Link>
-          <Link
+          </a>
+          <a
             href={`/admin/courseclass/${props.courseClassId}`}
             className="flex items-center px-4 bg-red-600 text-sm rounded font-bold text-white h-10 hover:bg-red-800"
           >
             Excluir
-          </Link>
+          </a>
         </div>
       )}
     </form>

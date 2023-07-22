@@ -140,7 +140,7 @@ async function seed() {
     create: {
       id: "c08ca2b6-235f-11ee-91ec-070617b256a3",
       name: "Flávio Menezes dos Reis",
-      email: "flaviomreis@gmail.com",
+      email: "f18s.f9s@gmail.com",
     },
   });
   console.log({ administratorKaty, administratorFlavio });
