@@ -1,4 +1,13 @@
 ###
+DELETE http://localhost:3000/api/enrollment
+Content-Type: application/json
+
+{
+  "courseClassId": "9009d9a2-235e-11ee-b374-2f0d658edfcd", 
+  "studentId":  "9009d9a2-235e-11ee-b374-2f0d658edfcd"
+}
+
+###
 POST http://localhost:3000/api/enrollment/
 Content-Type: application/json
 

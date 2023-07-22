@@ -1,6 +1,9 @@
 import { prisma } from "@/db/connection";
+import isAdministrator from "@/utils/is-administrator";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { string } from "zod";
+import { authOptions } from "../../auth/[...nextauth]/route";
 
 async function getCourseClass(id: string) {
   const result = await prisma.courseClass.findUnique({
@@ -24,6 +27,16 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const session = await getServerSession(authOptions);
+
+  if (
+    !session ||
+    !session.user ||
+    !(await isAdministrator(session.user.email))
+  ) {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  }
+
   const id = params.id;
 
   const courseClass = await getCourseClass(id);

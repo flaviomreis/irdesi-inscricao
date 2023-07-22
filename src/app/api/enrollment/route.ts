@@ -1,25 +1,127 @@
 import { prisma } from "@/db/connection";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { authOptions } from "../auth/[...nextauth]/route";
+import isAdministrator from "@/utils/is-administrator";
 
-export async function PUT(request: NextRequest) {
+export async function DELETE(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (
+    !session ||
+    !session.user ||
+    !(await isAdministrator(session.user.email))
+  ) {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  }
+
   const body = await request.json();
   const courseClassId = body.courseClassId;
   const studentId = body.studentId;
 
-  console.log(body.student, courseClassId, studentId);
-
   if (!courseClassId) {
     return NextResponse.json(
-      { error: "`Um id de turma precisa ser enviado." },
+      { error: "Um id de turma precisa ser enviado." },
       {
         status: 401,
       }
     );
   }
 
+  const foundCourseClass = await prisma.courseClass.findUnique({
+    where: {
+      id: courseClassId,
+    },
+  });
+
+  if (!foundCourseClass) {
+    return NextResponse.json(
+      { error: `A turma ${courseClassId} não existe.` },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  if (!studentId) {
+    return NextResponse.json(
+      { error: "Um id de estudante preicsa ser enviado." },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const foundStudent = await prisma.student.findUnique({
+    where: {
+      id: studentId,
+    },
+  });
+
+  if (!foundStudent) {
+    return NextResponse.json(
+      { error: `O estudante ${studentId} não existe.` },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const enrollment = await prisma.enrollment.findUnique({
+    where: {
+      enrollment: {
+        student_id: studentId,
+        course_class_id: courseClassId,
+      },
+    },
+  });
+
+  if (!enrollment) {
+    return NextResponse.json(
+      {
+        error: `Não existe uma matrícula para o estudante ${studentId} na turma ${courseClassId}.`,
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  await prisma.enrollment.delete({
+    where: {
+      enrollment: {
+        student_id: studentId,
+        course_class_id: courseClassId,
+      },
+    },
+  });
+
+  return NextResponse.json(
+    { error: "Matrícula excluída." },
+    {
+      status: 200,
+    }
+  );
+}
+
+export async function PUT(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (
+    !session ||
+    !session.user ||
+    !(await isAdministrator(session.user.email))
+  ) {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  }
+
+  const body = await request.json();
+  const courseClassId = body.courseClassId;
+  const studentId = body.studentId;
+
   if (!courseClassId) {
     return NextResponse.json(
-      { error: "`Um id de turma precisa ser enviado." },
+      { error: "Um id de turma precisa ser enviado." },
       {
         status: 401,
       }
@@ -45,7 +147,7 @@ export async function PUT(request: NextRequest) {
 
   if (!studentEmail) {
     return NextResponse.json(
-      { error: "`O email não pode ser em branco." },
+      { error: "O email não pode ser em branco." },
       {
         status: 401,
       }
@@ -56,7 +158,7 @@ export async function PUT(request: NextRequest) {
 
   if (!studentName) {
     return NextResponse.json(
-      { error: "`O nome não pode ser em branco." },
+      { error: "O nome não pode ser em branco." },
       {
         status: 401,
       }
@@ -67,7 +169,7 @@ export async function PUT(request: NextRequest) {
 
   if (!studentLastName) {
     return NextResponse.json(
-      { error: "`O sobrenome não pode ser em branco." },
+      { error: "O sobrenome não pode ser em branco." },
       {
         status: 401,
       }
@@ -78,7 +180,7 @@ export async function PUT(request: NextRequest) {
 
   if (!studentCPF) {
     return NextResponse.json(
-      { error: "`O CPF não pode ser em branco." },
+      { error: "O CPF não pode ser em branco." },
       {
         status: 401,
       }
@@ -160,6 +262,16 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (
+    !session ||
+    !session.user ||
+    !(await isAdministrator(session.user.email))
+  ) {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  }
+
   const body = await request.json();
   const courseClassId = body.courseClassId;
 

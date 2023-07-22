@@ -3,19 +3,7 @@ import NextAuthProvider from "../providers/auth";
 import { prisma } from "@/db/connection";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
-
-async function isAdministrator(
-  email: string | undefined | null
-): Promise<boolean> {
-  if (!email) return false;
-  const administrator = await prisma.administrator.findUnique({
-    where: {
-      email,
-    },
-  });
-  if (!administrator) return false;
-  return true;
-}
+import isAdministrator from "@/utils/is-administrator";
 
 export default async function AdminLayout({
   children,
