@@ -50,7 +50,11 @@ export default async function AdminCourseClassPage({
           {courseClass?.enrollment.map((enrollment) => {
             return (
               <tr key={enrollment.id}>
-                <td>{enrollment.student.cpf}</td>
+                <td>
+                  <Link href={`/admin/enrollment/${enrollment.id}`}>
+                    {enrollment.student.cpf}
+                  </Link>
+                </td>
                 <td>{enrollment.student.email}</td>
                 <td>{enrollment.student.name}</td>
                 <td>{enrollment.student.last_name}</td>
