@@ -8,7 +8,6 @@ type Props = {
 
 export default function CopyToClipboardButton(props: Props) {
   function copyToClipboard(id: string) {
-    console.log(`${baseUrl}/enroll/${props.id}`);
     navigator.clipboard.writeText(`${baseUrl}/enroll/${props.id}`);
   }
 

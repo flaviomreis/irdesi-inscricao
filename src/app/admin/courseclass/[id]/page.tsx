@@ -41,10 +41,12 @@ export default async function AdminCourseClassPage({
       <h2>Estudantes</h2>
       <table className="table-auto text-left">
         <thead>
-          <th>CPF</th>
-          <th>email</th>
-          <th>Nome</th>
-          <th>Sobrenome</th>
+          <tr>
+            <th>CPF</th>
+            <th>email</th>
+            <th>Nome</th>
+            <th>Sobrenome</th>
+          </tr>
         </thead>
         <tbody>
           {courseClass?.enrollment.map((enrollment) => {

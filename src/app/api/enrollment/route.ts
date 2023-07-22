@@ -1,11 +1,167 @@
 import { prisma } from "@/db/connection";
 import { NextRequest, NextResponse } from "next/server";
 
+export async function PUT(request: NextRequest) {
+  const body = await request.json();
+  const courseClassId = body.courseClassId;
+  const studentId = body.studentId;
+
+  console.log(body.student, courseClassId, studentId);
+
+  if (!courseClassId) {
+    return NextResponse.json(
+      { error: "`Um id de turma precisa ser enviado." },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  if (!courseClassId) {
+    return NextResponse.json(
+      { error: "`Um id de turma precisa ser enviado." },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const foundCourseClass = await prisma.courseClass.findUnique({
+    where: {
+      id: courseClassId,
+    },
+  });
+
+  if (!foundCourseClass) {
+    return NextResponse.json(
+      { error: `A turma ${courseClassId} não existe.` },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const studentEmail = body.student.email;
+
+  if (!studentEmail) {
+    return NextResponse.json(
+      { error: "`O email não pode ser em branco." },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const studentName = body.student.name;
+
+  if (!studentName) {
+    return NextResponse.json(
+      { error: "`O nome não pode ser em branco." },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const studentLastName = body.student.lastName;
+
+  if (!studentLastName) {
+    return NextResponse.json(
+      { error: "`O sobrenome não pode ser em branco." },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const studentCPF = body.student.cpf;
+
+  if (!studentCPF) {
+    return NextResponse.json(
+      { error: "`O CPF não pode ser em branco." },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const foundStudentByEmail = await prisma.student.findUnique({
+    where: {
+      email: studentEmail,
+      NOT: {
+        id: studentId,
+      },
+    },
+  });
+
+  if (foundStudentByEmail && foundStudentByEmail.cpf !== studentCPF) {
+    return NextResponse.json(
+      { error: `Email ${studentEmail} vinculado a outro CPF.` },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const foundStudentByCPF = await prisma.student.findUnique({
+    where: {
+      cpf: studentCPF,
+      NOT: {
+        id: studentId,
+      },
+    },
+  });
+
+  if (foundStudentByCPF && foundStudentByCPF.email !== studentEmail) {
+    return NextResponse.json(
+      { error: `CPF ${studentCPF} vinculado a outro email.` },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  if (!foundStudentByEmail) {
+    await prisma.student.update({
+      where: {
+        id: studentId,
+      },
+      data: {
+        name: studentName,
+        last_name: studentLastName,
+        email: studentEmail,
+        cpf: studentCPF,
+        employeeId: body.student.employeeId,
+      },
+    });
+  }
+
+  const student = await prisma.student.findUnique({
+    where: {
+      id: studentId,
+    },
+  });
+
+  if (!student) {
+    return NextResponse.json(
+      { error: `Falha ao pré-inscrever ${studentEmail}.` },
+      {
+        status: 500,
+      }
+    );
+  }
+
+  return NextResponse.json(
+    {
+      error: `Dados do aluno atualizados com sucesso.`,
+    },
+    { status: 200 }
+  );
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const courseClassId = body.courseClassId;
-
-  console.log(body.student);
 
   if (!courseClassId) {
     return NextResponse.json(

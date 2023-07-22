@@ -14,6 +14,13 @@ async function getCourseClass(id: string) {
 export default async function Enroll({ params }: { params: { id: string } }) {
   const courseClass = await getCourseClass(params.id);
 
+  const student = {
+    name: "",
+    lastName: "",
+    email: "",
+    cpf: "",
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-2 break-words mx-auto px-4 max-w-lg">
       <Image
@@ -40,7 +47,12 @@ export default async function Enroll({ params }: { params: { id: string } }) {
             {courseClass?.course?.name} ({courseClass?.description})
           </p>
           {!courseClass?.requireemployeeId ? (
-            <EnrollmentForm courseClassId={courseClass.id} />
+            <EnrollmentForm
+              courseClassId={courseClass.id}
+              action={`${baseUrl}/api/enrollment/`}
+              method="POST"
+              student={student}
+            />
           ) : (
             <EnrollmentWithEmployeeIdForm courseClassId={courseClass.id} />
           )}

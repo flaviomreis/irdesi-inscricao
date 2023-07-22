@@ -3,35 +3,43 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { EnrollmentFormSchema } from "@/schema/EnrollmentFormSchema";
-import { baseUrl } from "@/utils/baseurl";
 import { useState } from "react";
+import Link from "next/link";
+
+type UserEnrollmentFormData = z.infer<typeof EnrollmentFormSchema>;
 
 type Props = {
   courseClassId: string;
+  method: "POST" | "PUT";
+  action: string;
+  student: UserEnrollmentFormData;
+  studentId?: string;
 };
 
 export default function EnrollmentForm(props: Props) {
-  type UserEnrollmentFormData = z.infer<typeof EnrollmentFormSchema>;
-
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<UserEnrollmentFormData>({
     resolver: zodResolver(EnrollmentFormSchema),
+    defaultValues: props.student,
   });
+
+  console.log(props);
 
   const [enrollmentError, setEnrollmentError] = useState<string>("");
 
   async function userEnrollment(data: UserEnrollmentFormData) {
-    const result = await fetch(`${baseUrl}/api/enrollment/`, {
-      method: "POST",
+    const result = await fetch(props.action, {
+      method: props.method,
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         courseClassId: props.courseClassId,
         student: data,
+        studentId: props.studentId,
       }),
     });
     const json = await result.json();
@@ -115,6 +123,23 @@ export default function EnrollmentForm(props: Props) {
       >
         {isSubmitting ? "Enviando" : "Enviar"}
       </button>
+
+      {props.method === "PUT" && (
+        <div className="flex items-center justify-between">
+          <Link
+            href={`/admin/courseclass/${props.courseClassId}`}
+            className="flex items-center px-4 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
+          >
+            Cancelar
+          </Link>
+          <Link
+            href={`/admin/courseclass/${props.courseClassId}`}
+            className="flex items-center px-4 bg-red-600 text-sm rounded font-bold text-white h-10 hover:bg-red-800"
+          >
+            Excluir
+          </Link>
+        </div>
+      )}
     </form>
   );
 }
