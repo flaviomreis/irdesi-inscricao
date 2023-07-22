@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { EnrollmentFormSchema } from "@/schema/EnrollmentFormSchema";
 import { useState } from "react";
-import Link from "next/link";
 
 type UserEnrollmentFormData = z.infer<typeof EnrollmentFormSchema>;
 
@@ -25,8 +24,6 @@ export default function EnrollmentForm(props: Props) {
     resolver: zodResolver(EnrollmentFormSchema),
     defaultValues: props.student,
   });
-
-  console.log(props);
 
   const [enrollmentError, setEnrollmentError] = useState<string>("");
 

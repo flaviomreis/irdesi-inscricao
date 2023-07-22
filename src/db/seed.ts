@@ -66,6 +66,7 @@ async function seed() {
       course_id: course.id,
       institution_id: institutionSorrisoMT.id,
       description: "1a. Edição",
+      requireemployeeId: true,
     },
   });
   console.log(courseClassSorrisoMT);

@@ -19,6 +19,7 @@ export default async function Enroll({ params }: { params: { id: string } }) {
     lastName: "",
     email: "",
     cpf: "",
+    employeeId: "",
   };
 
   return (
@@ -54,7 +55,12 @@ export default async function Enroll({ params }: { params: { id: string } }) {
               student={student}
             />
           ) : (
-            <EnrollmentWithEmployeeIdForm courseClassId={courseClass.id} />
+            <EnrollmentWithEmployeeIdForm
+              courseClassId={courseClass.id}
+              action={`${baseUrl}/api/enrollment/`}
+              method="POST"
+              student={student}
+            />
           )}
         </>
       )}

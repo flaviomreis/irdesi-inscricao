@@ -1,6 +1,5 @@
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração de Pré-Inscrições",
@@ -65,12 +64,12 @@ export default async function AdminCourseClassPage({
           })}
         </tbody>
       </table>
-      <Link
+      <a
         href={`/api/download/${courseClassId}`}
         className="flex items-center justify-center bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
       >
         Download
-      </Link>
+      </a>
     </div>
   );
 }
