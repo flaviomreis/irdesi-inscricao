@@ -2,7 +2,6 @@ import { prisma } from "@/db/connection";
 import isAdministrator from "@/utils/is-administrator";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { string } from "zod";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
 async function getCourseClass(id: string) {
