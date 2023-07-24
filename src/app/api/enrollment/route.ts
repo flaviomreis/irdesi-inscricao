@@ -105,15 +105,15 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  // const session = await getServerSession(authOptions);
 
-  if (
-    !session ||
-    !session.user ||
-    !(await isAdministrator(session.user.email))
-  ) {
-    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-  }
+  // if (
+  //   !session ||
+  //   !session.user ||
+  //   !(await isAdministrator(session.user.email))
+  // ) {
+  //   return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  // }
 
   const body = await request.json();
   const courseClassId = body.courseClassId;
@@ -262,15 +262,15 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  // const session = await getServerSession(authOptions);
 
-  if (
-    !session ||
-    !session.user ||
-    !(await isAdministrator(session.user.email))
-  ) {
-    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-  }
+  // if (
+  //   !session ||
+  //   !session.user ||
+  //   !(await isAdministrator(session.user.email))
+  // ) {
+  //   return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  // }
 
   const body = await request.json();
   const courseClassId = body.courseClassId;
