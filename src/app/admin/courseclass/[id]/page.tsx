@@ -1,3 +1,4 @@
+import DownloadButton from "@/components/DownloadButton";
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
 
@@ -64,12 +65,7 @@ export default async function AdminCourseClassPage({
           })}
         </tbody>
       </table>
-      <a
-        href={`/api/download/${courseClassId}`}
-        className="flex items-center justify-center bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
-      >
-        Download
-      </a>
+      <DownloadButton courseClassId={courseClassId} />
     </div>
   );
 }

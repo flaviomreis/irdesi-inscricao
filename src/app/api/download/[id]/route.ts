@@ -3,6 +3,7 @@ import isAdministrator from "@/utils/is-administrator";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import archiver from "archiver";
 
 async function getCourseClass(id: string) {
   const result = await prisma.courseClass.findUnique({
@@ -37,6 +38,7 @@ export async function GET(
   }
 
   const id = params.id;
+  const checked = request.nextUrl.searchParams.get("checked");
 
   const courseClass = await getCourseClass(id);
   if (!courseClass) {
@@ -56,12 +58,31 @@ export async function GET(
     );
   });
 
-  const headers = new Headers();
-  headers.set("Content-type", "txt/csv");
-  headers.set(
-    "Content-Disposition",
-    `attachment; filename=${courseClass.institution.short_name}-${courseClass.course.short_name}.csv`
-  );
+  const archive = archiver("zip", { gzip: false, store: false });
+  // archive.append(Buffer.from("file1"), { name: "file1.txt" });
+  // archive.append(Buffer.from("file2"), { name: "file2.txt" });
+  archive.append(Buffer.from(output.join("\n")), { name: "lista.csv" });
+  await archive.finalize();
+  const chuncks = [];
+  for await (let chunck of archive) {
+    chuncks.push(chunck);
+  }
 
-  return new NextResponse(output.join("\n"), { status: 200, headers });
+  const headers = new Headers();
+
+  if (checked && checked === "false") {
+    headers.set("Content-type", "txt/csv");
+    headers.set(
+      "Content-Disposition",
+      `attachment; filename=${courseClass.institution.short_name}-${courseClass.course.short_name}.csv`
+    );
+    return new NextResponse(output.join("\n"), { status: 200, headers });
+  } else {
+    headers.set("Content-type", "application/zip");
+    headers.set(
+      "Content-Disposition",
+      `attachment; filename=${courseClass.institution.short_name}-${courseClass.course.short_name}.zip`
+    );
+    return new NextResponse(Buffer.concat(chuncks), { status: 200, headers });
+  }
 }
