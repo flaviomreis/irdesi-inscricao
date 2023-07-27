@@ -70,7 +70,7 @@ model Enrollment {
 model EnrollmentStatus {
   id                        String               @id @default(uuid())
   enrollment_id             String
-  enrollmend                Enrollment           @relation(fields: [enrollment_id], references: [id])
+  enrollment                Enrollment           @relation(fields: [enrollment_id], references: [id])
   enrollment_status_type_id String
   enrollment_status_type    EnrollmentStatusType @relation(fields: [enrollment_status_type_id], references: [id])
   created_at                DateTime             @default(now())
@@ -79,7 +79,7 @@ model EnrollmentStatus {
 // 0: sent, 1: confirmed, 2: active, 3: finished
 model EnrollmentStatusType {
   id                String             @id @default(uuid())
-  name              String
+  name              String @unique
   enrollment_status EnrollmentStatus[]
   created_at        DateTime           @default(now())
 }
