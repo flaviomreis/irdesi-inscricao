@@ -8,12 +8,18 @@ export default function CourseClassStudentsList({
 }: {
   dao: CourseClassStudentsDAO[];
 }) {
-  const [sentChecked, setSendChecked] = useState(true);
+  const [sentChecked, setSentChecked] = useState(true);
+  const [confirmedChecked, setConfirmedChecked] = useState(false);
+  const [activeChecked, setActiveChecked] = useState(false);
+  const [finishedChecked, setFinishedChecked] = useState(false);
   const items: CourseClassStudentsDAO[] = applyFilter();
 
   function handleChecks(e: HTMLInputElement) {
     console.log(e.name);
-    e.name == "sentCheck" && setSendChecked(!sentChecked);
+    e.name == "sentCheck" && setSentChecked(!sentChecked);
+    e.name == "confirmedCheck" && setConfirmedChecked(!confirmedChecked);
+    e.name == "activeCheck" && setActiveChecked(!activeChecked);
+    e.name == "finishedCheck" && setFinishedChecked(!finishedChecked);
     applyFilter();
   }
 
@@ -22,6 +28,10 @@ export default function CourseClassStudentsList({
       if (item.status == "Sent" && sentChecked) {
         return true;
       }
+      if (item.status == "Confirmed" && confirmedChecked) {
+        return true;
+      }
+      console.log(item.status);
     });
     return filter;
   }
@@ -86,7 +96,9 @@ export default function CourseClassStudentsList({
           <input
             type="checkbox"
             className="w-4 h-4 m-1 rounded-full text-blue-500 focus:ring-blue-500 accent-blue-500 border border-blue-500"
-            defaultChecked={false}
+            checked={confirmedChecked}
+            name="confirmedCheck"
+            onChange={(e) => handleChecks(e.target)}
           />
           Confirmada
         </label>
