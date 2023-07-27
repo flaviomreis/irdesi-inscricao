@@ -87,6 +87,12 @@ export async function DELETE(request: NextRequest) {
     );
   }
 
+  await prisma.enrollmentStatus.deleteMany({
+    where: {
+      enrollment,
+    },
+  });
+
   await prisma.enrollment.delete({
     where: {
       enrollment: {

@@ -15,7 +15,20 @@ async function getCourseClass(id: string) {
       enrollment: {
         include: {
           student: true,
+          enrollment_status: {
+            include: {
+              enrollment_status_type: true,
+            },
+          },
         },
+        take: 10,
+        orderBy: [
+          {
+            student: {
+              name: "asc",
+            },
+          },
+        ],
       },
       institution: true,
       course: true,
@@ -38,7 +51,7 @@ export default async function AdminCourseClassPage({
       <h2>
         Turma: {courseClass?.course.short_name} ({courseClass?.description})
       </h2>
-      <h2>Estudantes</h2>
+      <h2>Estudantes (10 primeiros)</h2>
       <table className="table-auto text-left">
         <thead>
           <tr>
@@ -53,9 +66,27 @@ export default async function AdminCourseClassPage({
             return (
               <tr key={enrollment.id}>
                 <td>
-                  <a href={`/admin/enrollment/${enrollment.id}`}>
-                    {enrollment.student.cpf}
-                  </a>
+                  <div className="flex items-center gap-2">
+                    {enrollment.enrollment_status[0].enrollment_status_type
+                      .name == "Sent" && (
+                      <div className="h-2 w-2 rounded-full bg-yellow-200"></div>
+                    )}
+                    {enrollment.enrollment_status[0].enrollment_status_type
+                      .name == "Confirmed" && (
+                      <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                    )}
+                    {enrollment.enrollment_status[0].enrollment_status_type
+                      .name == "Active" && (
+                      <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                    )}
+                    {enrollment.enrollment_status[0].enrollment_status_type
+                      .name == "Finished" && (
+                      <div className="h-2 w-2 rounded-full bg-black"></div>
+                    )}
+                    <a href={`/admin/enrollment/${enrollment.id}`}>
+                      {enrollment.student.cpf}
+                    </a>
+                  </div>
                 </td>
                 <td>{enrollment.student.email}</td>
                 <td>{enrollment.student.name}</td>
@@ -66,6 +97,17 @@ export default async function AdminCourseClassPage({
         </tbody>
       </table>
       <DownloadButton courseClassId={courseClassId} />
+      <div className="flex items-center gap-2">
+        Status da pré-inscrição:
+        <div className="h-4 w-4 rounded-full bg-yellow-300"></div>
+        <span>Enviado</span>
+        <div className="h-4 w-4 rounded-full bg-blue-500"></div>
+        <span>Confirmado</span>
+        <div className="h-4 w-4 rounded-full bg-green-500"></div>
+        <span>Ativo</span>
+        <div className="h-4 w-4 rounded-full bg-black"></div>
+        <span>Concluído</span>
+      </div>
     </div>
   );
 }
