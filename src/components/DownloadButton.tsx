@@ -28,6 +28,15 @@ export default function DownloadButton({ courseClassId }: Props) {
         <input className="mr-2" type="checkbox" id="checked" />
         Zip
       </label>
+      <label className="text-xs">
+        a cada
+        <input
+          className="text-xs w-20 border-0"
+          type="number"
+          value="100"
+          step="100"
+        />
+      </label>
     </div>
   );
 }

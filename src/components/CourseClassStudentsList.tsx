@@ -9,7 +9,7 @@ export default function CourseClassStudentsList({
   dao: CourseClassStudentsDAO[];
 }) {
   const [sentChecked, setSentChecked] = useState(true);
-  const [confirmedChecked, setConfirmedChecked] = useState(false);
+  const [confirmedChecked, setConfirmedChecked] = useState(true);
   const [activeChecked, setActiveChecked] = useState(false);
   const [finishedChecked, setFinishedChecked] = useState(false);
   const items: CourseClassStudentsDAO[] = applyFilter();
@@ -31,15 +31,52 @@ export default function CourseClassStudentsList({
       if (item.status == "Confirmed" && confirmedChecked) {
         return true;
       }
-      console.log(item.status);
     });
     return filter;
   }
 
-  console.log("renderizou");
-
   return (
     <>
+      <div className="flex items-center gap-2 w-full border-t border-gray-400 text-gray-500">
+        Status da pré-inscrição:
+        <label>
+          <input
+            type="checkbox"
+            className="w-4 h-4 m-1 rounded-full text-yellow-400 focus:ring-yellow-400 accent-yellow-400 border border-yellow-400"
+            checked={sentChecked}
+            name="sentCheck"
+            onChange={(e) => handleChecks(e.target)}
+          />
+          Enviada
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            className="w-4 h-4 m-1 rounded-full text-blue-500 focus:ring-blue-500 accent-blue-500 border border-blue-500"
+            checked={confirmedChecked}
+            name="confirmedCheck"
+            onChange={(e) => handleChecks(e.target)}
+          />
+          Confirmada
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            className="w-4 h-4 m-1 rounded-full text-green-500 focus:ring-green-500 accent-green-500 border border-green-500"
+            defaultChecked={false}
+          />
+          Ativa
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            className="w-4 h-4 m-1 rounded-full text-black focus:ring-black accent-black border border-black"
+            defaultChecked={false}
+          />
+          Concluída
+        </label>
+      </div>
+
       <table className="table-auto text-left">
         <thead>
           <tr>
@@ -80,45 +117,6 @@ export default function CourseClassStudentsList({
           })}
         </tbody>
       </table>
-      <div className="flex items-center gap-2 w-full border-t border-gray-400">
-        Status da pré-inscrição:
-        <label>
-          <input
-            type="checkbox"
-            className="w-4 h-4 m-1 rounded-full text-yellow-400 focus:ring-yellow-400 accent-yellow-400 border border-yellow-400"
-            checked={sentChecked}
-            name="sentCheck"
-            onChange={(e) => handleChecks(e.target)}
-          />
-          Enviada
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            className="w-4 h-4 m-1 rounded-full text-blue-500 focus:ring-blue-500 accent-blue-500 border border-blue-500"
-            checked={confirmedChecked}
-            name="confirmedCheck"
-            onChange={(e) => handleChecks(e.target)}
-          />
-          Confirmada
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            className="w-4 h-4 m-1 rounded-full text-green-500 focus:ring-green-500 accent-green-500 border border-green-500"
-            defaultChecked={false}
-          />
-          Ativa
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            className="w-4 h-4 m-1 rounded-full text-black focus:ring-black accent-black border border-black"
-            defaultChecked={false}
-          />
-          Concluída
-        </label>
-      </div>
     </>
   );
 }
