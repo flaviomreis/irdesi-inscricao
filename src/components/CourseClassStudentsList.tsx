@@ -2,6 +2,7 @@
 
 import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
 import { useEffect, useState } from "react";
+import FilterIcon from "./FilterIcon";
 
 export default function CourseClassStudentsList({
   dao,
@@ -13,6 +14,7 @@ export default function CourseClassStudentsList({
   const [activeChecked, setActiveChecked] = useState(false);
   const [finishedChecked, setFinishedChecked] = useState(false);
   const items: CourseClassStudentsDAO[] = applyFilter();
+  const [isVisibleFilterPanel, setIsVisibleFilterPanel] = useState(false);
 
   function handleChecks(e: HTMLInputElement) {
     console.log(e.name);
@@ -35,10 +37,21 @@ export default function CourseClassStudentsList({
     return filter;
   }
 
+  function toogleFilterPanel() {
+    setIsVisibleFilterPanel(!isVisibleFilterPanel);
+  }
+
   return (
     <div className="relative flex">
-      <div className="bg-gray-300 text-blue-100 w-48">
-        <div className="flex flex-col gap-2 border border-gray-400 text-gray-500">
+      <div
+        className={
+          isVisibleFilterPanel
+            ? "bg-gray-300 w-48 absolute rounded-lg border border-gray-400 text-gray-500"
+            : "w-48 absolute hidden"
+        }
+      >
+        <div className="flex flex-col gap-2 p-4 shadow-lg shadow-gray-400">
+          <FilterIcon toogleVisibility={toogleFilterPanel} />
           Status da pré-inscrição
           <label>
             <input
@@ -64,7 +77,9 @@ export default function CourseClassStudentsList({
             <input
               type="checkbox"
               className="w-4 h-4 m-1 rounded-full text-green-500 focus:ring-green-500 accent-green-500 border border-green-500"
-              defaultChecked={false}
+              checked={activeChecked}
+              name="activeCheck"
+              onChange={(e) => handleChecks(e.target)}
             />
             Ativa
           </label>
@@ -72,7 +87,9 @@ export default function CourseClassStudentsList({
             <input
               type="checkbox"
               className="w-4 h-4 m-1 rounded-full text-black focus:ring-black accent-black border border-black"
-              defaultChecked={false}
+              checked={finishedChecked}
+              name="finishedCheck"
+              onChange={(e) => handleChecks(e.target)}
             />
             Concluída
           </label>
@@ -81,19 +98,22 @@ export default function CourseClassStudentsList({
 
       <div className="flex-1">
         <table className="min-w-full text-left">
-          <thead>
-            <tr>
-              <th>CPF</th>
-              <th>email</th>
-              <th>Nome</th>
-              <th>Sobrenome</th>
+          <thead className="border-b border-gray-400">
+            <tr className="flex flex-col md:flex-row">
+              <th className="flex items-center gap-1 md:w-[20%]">
+                <FilterIcon toogleVisibility={toogleFilterPanel} />
+                CPF
+              </th>
+              <th className="md:w-[30%]">email</th>
+              <th className="md:w-[30%]">Nome</th>
+              <th className="md:w-[20%]">Sobrenome</th>
             </tr>
           </thead>
           <tbody>
             {items.map((enrollment) => {
               return (
-                <tr key={enrollment.id}>
-                  <td>
+                <tr key={enrollment.id} className="flex flex-col md:flex-row">
+                  <td className="md:w-[20%]">
                     <div className="flex items-center gap-2">
                       {enrollment.status == "Sent" && (
                         <div className="h-2 w-2 rounded-full bg-yellow-400"></div>
@@ -112,9 +132,9 @@ export default function CourseClassStudentsList({
                       </a>
                     </div>
                   </td>
-                  <td>{enrollment.email}</td>
-                  <td>{enrollment.name}</td>
-                  <td>{enrollment.lastName}</td>
+                  <td className="md:w-[30%]">{enrollment.email}</td>
+                  <td className="md:w-[30%]">{enrollment.name}</td>
+                  <td className="md:w-[20%]">{enrollment.lastName}</td>
                 </tr>
               );
             })}

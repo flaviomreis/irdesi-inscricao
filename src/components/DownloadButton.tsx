@@ -12,11 +12,11 @@ export default function DownloadButton({ courseClassId }: Props) {
   const [groups, setGroups] = useState(100);
 
   return (
-    <div className="flex items-center">
+    <div className="flex flex-col items-center md:flex-row">
       <Link
         href={`/api/download/${courseClassId}?checked=${zip}&groups=${groups}`}
         target="_blank"
-        className="flex items-center justify-center flex-1 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
+        className="flex items-center justify-center w-full md:flex-1 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
       >
         Download
       </Link>
@@ -32,7 +32,7 @@ export default function DownloadButton({ courseClassId }: Props) {
       <label className="text-xs">
         a cada
         <input
-          className="text-xs w-20 border-0"
+          className="text-xs w-20 border-0 mt-2 md:mt-0 px-0 ml-2 py-1 text-right bg-gray-200"
           type="number"
           value={groups}
           onChange={(e) => setGroups(+e.target.value)}
