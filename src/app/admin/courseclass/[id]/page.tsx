@@ -65,13 +65,12 @@ export default async function AdminCourseClassPage({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-1 flex-col gap-2">
       <h2>Contrato: {courseClass?.institution.short_name}</h2>
       <h2>
         Turma: {courseClass?.course.short_name} ({courseClass?.description})
       </h2>
       <h2>Estudantes (10 primeiros)</h2>
-
       <CourseClassStudentsList dao={dao} />
       <DownloadButton courseClassId={courseClassId} />
     </div>

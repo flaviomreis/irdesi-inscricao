@@ -39,6 +39,7 @@ export async function GET(
 
   const id = params.id;
   const checked = request.nextUrl.searchParams.get("checked");
+  const groups: number = +(request.nextUrl.searchParams.get("groups") ?? 0);
 
   const courseClass = await getCourseClass(id);
   if (!courseClass) {
