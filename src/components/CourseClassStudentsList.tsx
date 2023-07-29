@@ -10,14 +10,13 @@ export default function CourseClassStudentsList({
   dao: CourseClassStudentsDAO[];
 }) {
   const [sentChecked, setSentChecked] = useState(true);
-  const [confirmedChecked, setConfirmedChecked] = useState(true);
+  const [confirmedChecked, setConfirmedChecked] = useState(false);
   const [activeChecked, setActiveChecked] = useState(false);
   const [finishedChecked, setFinishedChecked] = useState(false);
   const items: CourseClassStudentsDAO[] = applyFilter();
   const [isVisibleFilterPanel, setIsVisibleFilterPanel] = useState(false);
 
   function handleChecks(e: HTMLInputElement) {
-    console.log(e.name);
     e.name == "sentCheck" && setSentChecked(!sentChecked);
     e.name == "confirmedCheck" && setConfirmedChecked(!confirmedChecked);
     e.name == "activeCheck" && setActiveChecked(!activeChecked);
@@ -46,7 +45,7 @@ export default function CourseClassStudentsList({
       <div
         className={
           isVisibleFilterPanel
-            ? "bg-gray-300 w-48 absolute rounded-lg border border-gray-400 text-gray-500"
+            ? "bg-gray-300 w-48 absolute rounded-lg border border-gray-400 text-gray-500 -top-4 -left-4"
             : "w-48 absolute hidden"
         }
       >
