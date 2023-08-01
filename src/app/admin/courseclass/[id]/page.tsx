@@ -71,7 +71,7 @@ export default async function AdminCourseClassPage({
         Turma: {courseClass?.course.short_name} ({courseClass?.description})
       </h2>
       <h2>Estudantes (10 primeiros)</h2>
-      <CourseClassStudentsList dao={dao} />
+      <CourseClassStudentsList courseClassId={courseClassId} dao={dao} />
       <DownloadButton courseClassId={courseClassId} />
     </div>
   );
