@@ -1,7 +1,7 @@
 "use client";
 
 import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import FilterIcon from "./FilterIcon";
 import Link from "next/link";
 
@@ -15,15 +15,23 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
   const [confirmedChecked, setConfirmedChecked] = useState(false);
   const [activeChecked, setActiveChecked] = useState(false);
   const [finishedChecked, setFinishedChecked] = useState(false);
-  const items: CourseClassStudentsDAO[] = applyFilter();
+  const [items, setItems] = useState<CourseClassStudentsDAO[]>(dao);
+
+  useMemo(() => {
+    console.log("filtrando-incrível é server e client side ao mesmo tempo");
+    setItems(applyFilter());
+  }, []);
 
   function handleChecks(e: HTMLInputElement) {
     e.name == "sentCheck" && setSentChecked(!sentChecked);
     e.name == "confirmedCheck" && setConfirmedChecked(!confirmedChecked);
     e.name == "activeCheck" && setActiveChecked(!activeChecked);
     e.name == "finishedCheck" && setFinishedChecked(!finishedChecked);
-    applyFilter();
   }
+
+  useEffect(() => {
+    setItems(applyFilter());
+  }, [sentChecked, confirmedChecked, activeChecked, finishedChecked]);
 
   function applyFilter() {
     const filter = dao.filter((item) => {
@@ -38,16 +46,19 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
   }
 
   function handleOnSelectChange(id: string) {
-    const item = dao.filter((item) => item.id === id);
-    console.log(item[0].selected);
-    item[0].selected = !item[0].selected;
-    console.log(item[0].selected);
+    setItems(
+      items.map((item) => {
+        if (item.id === id) {
+          item.selected = !item.selected;
+        }
+        return item;
+      })
+    );
   }
 
   return (
     <div>
       <div className="flex bg-gray-200 gap-2 p-4 rounded-lg border border-gray-400 mb-4">
-        <FilterIcon />
         Status da pré-inscrição
         <label>
           <input
