@@ -1,12 +1,12 @@
 import { prisma } from "@/db/connection";
 
 type Check = {
-  id: string,
-  cpf: string,
-  name: string,
-  email: string,
-  status: string
-}
+  id: string;
+  cpf: string;
+  name: string;
+  email: string;
+  status: string;
+};
 
 async function getCourseClass(id: string) {
   const result = await prisma.courseClass.findUnique({
@@ -48,13 +48,13 @@ async function getMoodleCourseEnrollments(id: string) {
   const json = JSON.parse(await result.json());
   const courseClass = await getCourseClass(id);
 
-  if (courseClass) {
-    const enrollments = courseClass.enrollment;
-    const checking = enrollments.map((enrollment) => {
-      const index = json.findIndex(item: string => item.username == enrollment.student.cpf);
-      if (json.find())
-    });
-  }
+  // if (courseClass) {
+  //   const enrollments = courseClass.enrollment;
+  //   const checking = enrollments.map((enrollment) => {
+  //     const index = json.findIndex(item: string => item.username == enrollment.student.cpf);
+  //     if (json.find())
+  //   });
+  // }
   return json;
 }
 

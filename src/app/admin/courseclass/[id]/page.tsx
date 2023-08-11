@@ -21,12 +21,16 @@ async function getCourseClass(id: string) {
         include: {
           student: true,
           enrollment_status: {
+            take: 1,
+            orderBy: {
+              created_at: "desc",
+            },
             include: {
               enrollment_status_type: true,
             },
           },
         },
-        take: 10,
+        //        take: 10,
         orderBy: [
           {
             student: {
@@ -60,6 +64,7 @@ export default async function AdminCourseClassPage({
         cpf: enrollment.student.cpf,
         name: enrollment.student.name,
         lastName: enrollment.student.last_name,
+        selected: false,
       });
     });
   }
@@ -70,7 +75,7 @@ export default async function AdminCourseClassPage({
       <h2>
         Turma: {courseClass?.course.short_name} ({courseClass?.description})
       </h2>
-      <h2>Estudantes (10 primeiros)</h2>
+      <h2>Estudantes:</h2>
       <CourseClassStudentsList courseClassId={courseClassId} dao={dao} />
       <DownloadButton courseClassId={courseClassId} />
     </div>

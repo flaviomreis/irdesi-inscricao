@@ -5,6 +5,7 @@ export type CourseClassStudentsDAO = {
   email: string;
   name: string;
   lastName: string;
+  selected: boolean;
 };
 
 export type EnrollmentStatusType = "Sent" | "Confirmed" | "Active" | "Finished";

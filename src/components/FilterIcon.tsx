@@ -1,11 +1,6 @@
-type Props = {
-  toogleVisibility: () => void;
-};
-
-export default function FilterIcon(props: Props) {
+export default function FilterIcon() {
   return (
     <svg
-      onClick={props.toogleVisibility}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
