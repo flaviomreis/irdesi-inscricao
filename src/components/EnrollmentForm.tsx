@@ -31,7 +31,7 @@ export default function EnrollmentForm(props: Props) {
   const [isDialogVisible, setIsDialogVisible] = useState<boolean>(false);
 
   async function handleConfirmAction() {
-    const result = await fetch(`${baseUrl}/api/enrollment/`, {
+    const result = await fetch(`/api/enrollment/`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

@@ -1,10 +1,9 @@
 import Image from "next/image";
 import EnrollmentForm from "@/components/EnrollmentForm";
 import EnrollmentWithEmployeeIdForm from "@/components/EnrollmentWithEmployeeIdForm";
-import { baseUrl } from "@/utils/baseurl";
 
 async function getCourseClass(id: string) {
-  const result = await fetch(`${baseUrl}/api/courseclasses/${id}`, {
+  const result = await fetch(`/api/courseclasses/${id}`, {
     cache: "no-store",
   });
 
@@ -50,14 +49,14 @@ export default async function Enroll({ params }: { params: { id: string } }) {
           {!courseClass?.requireemployeeId ? (
             <EnrollmentForm
               courseClassId={courseClass.id}
-              action={`${baseUrl}/api/enrollment/`}
+              action={`/api/enrollment/`}
               method="POST"
               student={student}
             />
           ) : (
             <EnrollmentWithEmployeeIdForm
               courseClassId={courseClass.id}
-              action={`${baseUrl}/api/enrollment/`}
+              action={`/api/enrollment/`}
               method="POST"
               student={student}
             />

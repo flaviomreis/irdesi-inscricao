@@ -7,6 +7,7 @@ import CourseClassStudentsList from "@/components/CourseClassStudentsList";
 import DownloadButton from "@/components/DownloadButton";
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
+import { useRouter } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração de Pré-Inscrições",
@@ -88,7 +89,6 @@ export default async function AdminCourseClassPage({
       </h2>
       <h2>Estudantes:</h2>
       <CourseClassStudentsList courseClassId={courseClassId} dao={dao} />
-      <DownloadButton courseClassId={courseClassId} />
     </div>
   );
 }

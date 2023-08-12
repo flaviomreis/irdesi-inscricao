@@ -1,25 +1,26 @@
 "use client";
 
+import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
 import Link from "next/link";
 import { useState } from "react";
 
 type Props = {
   courseClassId: string;
+  handleButton: (zip: boolean, groups: number) => void;
 };
 
-export default function DownloadButton({ courseClassId }: Props) {
+export default function DownloadButton({ courseClassId, handleButton }: Props) {
   const [zip, setZip] = useState(false);
   const [groups, setGroups] = useState(100);
 
   return (
     <div className="flex flex-col items-center md:flex-row">
-      <Link
-        href={`/api/download/${courseClassId}?checked=${zip}&groups=${groups}`}
-        target="_blank"
+      <button
+        onClick={() => handleButton(zip, groups)}
         className="flex items-center justify-center w-full md:flex-1 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
       >
-        Download
-      </Link>
+        Inscrever
+      </button>
       <label className="px-4">
         <input
           className="mr-2"

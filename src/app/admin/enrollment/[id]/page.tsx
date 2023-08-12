@@ -1,7 +1,6 @@
 import EnrollmentForm from "@/components/EnrollmentForm";
 import EnrollmentWithEmployeeIdForm from "@/components/EnrollmentWithEmployeeIdForm";
 import { prisma } from "@/db/connection";
-import { baseUrl } from "@/utils/baseurl";
 
 async function getEnrollment(id: string) {
   const result = await prisma.enrollment.findUnique({
@@ -48,7 +47,7 @@ export default async function AdminEnrollmentUpdatePage({
       {!enrollment?.course_class.requireemployeeId ? (
         <EnrollmentForm
           courseClassId={enrollment!.course_class_id}
-          action={`${baseUrl}/api/enrollment/`}
+          action={`/api/enrollment/`}
           method="PUT"
           student={student}
           studentId={enrollment?.student_id}
@@ -56,7 +55,7 @@ export default async function AdminEnrollmentUpdatePage({
       ) : (
         <EnrollmentWithEmployeeIdForm
           courseClassId={enrollment!.course_class_id}
-          action={`${baseUrl}/api/enrollment/`}
+          action={`/api/enrollment/`}
           method="PUT"
           student={student}
           studentId={enrollment?.student_id}

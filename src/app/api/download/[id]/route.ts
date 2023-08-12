@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import archiver from "archiver";
+import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
 
 async function getCourseClass(id: string) {
   const result = await prisma.courseClass.findUnique({
@@ -23,7 +24,7 @@ async function getCourseClass(id: string) {
   return result;
 }
 
-export async function GET(
+export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -37,6 +38,8 @@ export async function GET(
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 
+  const body = await request.json();
+
   const id = params.id;
   const checked = request.nextUrl.searchParams.get("checked");
   const groups: number = +(request.nextUrl.searchParams.get("groups") ?? 100);
@@ -45,10 +48,7 @@ export async function GET(
   if (!courseClass) {
     return NextResponse.json({});
   }
-  const enrollment = courseClass?.enrollment;
-  if (!enrollment) {
-    return NextResponse.json({});
-  }
+  const enrollment: CourseClassStudentsDAO[] = body.dao;
 
   const archive = archiver("zip", { gzip: false, store: false });
   const chuncks = [];
@@ -57,9 +57,11 @@ export async function GET(
 
   for (let lineIndex = 0; lineIndex < enrollment.length; lineIndex++) {
     const item = enrollment[lineIndex];
-    output.push(
-      `${item.student.cpf};${item.student.name};${item.student.last_name};${item.student.email};${courseClass.course.short_name};student`
-    );
+    if (item.selected) {
+      output.push(
+        `${item.cpf};${item.name};${item.lastName};${item.email};${courseClass.course.short_name};student`
+      );
+    }
 
     // Se foi selecionado .zip
     if (checked && checked === "true") {
@@ -110,6 +112,7 @@ export async function GET(
       "Content-Disposition",
       `attachment; filename=${courseClass.institution.short_name}-${courseClass.course.short_name}.csv`
     );
+    console.log(output.join("\n"));
     return new NextResponse(output.join("\n"), { status: 200, headers });
   }
 }

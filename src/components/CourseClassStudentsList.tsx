@@ -3,7 +3,8 @@
 import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
 import { useEffect, useMemo, useState } from "react";
 import FilterIcon from "./FilterIcon";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import DownloadButton from "./DownloadButton";
 
 type Props = {
   courseClassId: string;
@@ -15,7 +16,9 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
   const [confirmedChecked, setConfirmedChecked] = useState(false);
   const [activeChecked, setActiveChecked] = useState(false);
   const [finishedChecked, setFinishedChecked] = useState(false);
+  const [checkAll, setCheckAll] = useState(false);
   const [items, setItems] = useState<CourseClassStudentsDAO[]>(dao);
+  const router = useRouter();
 
   useMemo(() => {
     console.log("filtrando-incrível é server e client side ao mesmo tempo");
@@ -54,6 +57,43 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
         return item;
       })
     );
+  }
+
+  async function handleSyncButton() {
+    const result = await fetch(`/api/enrollmentssync/${courseClassId}`);
+    if (result.status !== 200) {
+      const json = await result.json();
+      console.log(json);
+    }
+    router.back();
+  }
+
+  function handleCheckAll() {
+    setCheckAll(!checkAll);
+    setItems(
+      items.map((item) => {
+        item.selected = !checkAll;
+        return item;
+      })
+    );
+  }
+
+  async function handleButton(zip: boolean, groups: number) {
+    const result = await fetch(
+      `/api/download/${courseClassId}?checked=${zip}&groups=${groups}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/csv",
+        },
+        body: JSON.stringify({
+          dao: items,
+        }),
+      }
+    );
+
+    console.log(await result.text());
   }
 
   return (
@@ -100,20 +140,24 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
           />
           Concluída
         </label>
-        <a
-          href={`/admin/enrollmentssync/${courseClassId}`}
+        <button
           className="flex items-center justify-center w-full md:w-max md:px-2 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
+          onClick={handleSyncButton}
         >
           Sincronizar
-        </a>
+        </button>
       </div>
 
-      <div className="flex-1">
+      <div className="flex-1 mb-2">
         <table className="min-w-full text-left">
           <thead className="border-b border-gray-400">
             <tr className="flex flex-col md:flex-row">
               <th className="flex items-center gap-1 md:w-[20%]">
-                <input type="checkbox" />
+                <input
+                  type="checkbox"
+                  checked={checkAll}
+                  onChange={handleCheckAll}
+                />
                 CPF
               </th>
               <th className="md:w-[30%]">email</th>
@@ -157,6 +201,10 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
           </tbody>
         </table>
       </div>
+      <DownloadButton
+        courseClassId={courseClassId}
+        handleButton={handleButton}
+      />
     </div>
   );
 }
