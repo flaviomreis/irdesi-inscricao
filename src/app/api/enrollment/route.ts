@@ -436,24 +436,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const foundEnrollmentSentStatusType =
-    await prisma.enrollmentStatusType.findUnique({
-      where: {
-        name: "Sent",
-      },
-    });
-
-  if (!foundEnrollmentSentStatusType) {
-    return NextResponse.json(
-      {
-        error: "Falha ao obter o tipo de pré-inscrição: Enviado",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
-
   const enrollment = await prisma.enrollment.create({
     data: {
       course_class_id: foundCourseClass.id,
@@ -461,7 +443,7 @@ export async function POST(request: NextRequest) {
       enrollment_status: {
         create: [
           {
-            enrollment_status_type_id: foundEnrollmentSentStatusType.id,
+            enrollment_status_type_id: "Sent",
           },
         ],
       },

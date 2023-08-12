@@ -26,9 +26,6 @@ async function getCourseClass(id: string) {
             orderBy: {
               created_at: "desc",
             },
-            include: {
-              enrollment_status_type: true,
-            },
           },
         },
         orderBy: [
@@ -59,8 +56,8 @@ export default async function AdminCourseClassPage({
     courseClass.enrollment.map((enrollment) => {
       dao.push({
         id: enrollment.id,
-        status: enrollment.enrollment_status[0].enrollment_status_type
-          .name as EnrollmentStatusType,
+        status: enrollment.enrollment_status[0]
+          .enrollment_status_type as EnrollmentStatusType,
         email: enrollment.student.email,
         cpf: enrollment.student.cpf,
         name: enrollment.student.name,

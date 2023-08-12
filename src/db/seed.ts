@@ -71,56 +71,6 @@ async function seed() {
   });
   console.log(courseClassSorrisoMT);
 
-  const enrollmentStatusTypeSent = await prisma.enrollmentStatusType.upsert({
-    where: {
-      id: "905a5918-235e-11ee-af33-db1bb118101f",
-    },
-    update: {},
-    create: {
-      id: "905a5918-235e-11ee-af33-db1bb118101f",
-      name: "Sent",
-    },
-  });
-  const enrollmentStatusTypeConfirmed =
-    await prisma.enrollmentStatusType.upsert({
-      where: {
-        id: "3b75ab4a-235f-11ee-a4fa-23ffda96be16",
-      },
-      update: {},
-      create: {
-        id: "3b75ab4a-235f-11ee-a4fa-23ffda96be16",
-        name: "Confirmed",
-      },
-    });
-  const enrollmentStatusTypeActive = await prisma.enrollmentStatusType.upsert({
-    where: {
-      id: "3bbf3a80-235f-11ee-9b4b-eb391b4ad07b",
-    },
-    update: {},
-    create: {
-      id: "3bbf3a80-235f-11ee-9b4b-eb391b4ad07b",
-      name: "Active",
-    },
-  });
-  const enrollmentStatusTypeFinished = await prisma.enrollmentStatusType.upsert(
-    {
-      where: {
-        id: "3bfed064-235f-11ee-9141-83e70f29d84b",
-      },
-      update: {},
-      create: {
-        id: "3bfed064-235f-11ee-9141-83e70f29d84b",
-        name: "Finished",
-      },
-    }
-  );
-  console.log({
-    enrollmentStatusTypeSent,
-    enrollmentStatusTypeConfirmed,
-    enrollmentStatusTypeActive,
-    enrollmentStatusTypeFinished,
-  });
-
   const administratorKaty = await prisma.administrator.upsert({
     where: {
       id: "bfaa94b6-235f-11ee-bd3f-479b9e116a23",

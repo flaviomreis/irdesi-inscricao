@@ -22,21 +22,21 @@ model Institution {
   id           String        @id @default(uuid())
   name         String
   short_name   String        @unique
-  uf String
+  uf           String
   course_class CourseClass[]
   created_at   DateTime      @default(now())
 }
 
 model CourseClass {
-  id             String       @id @default(uuid())
-  course_id      String
-  course         Course       @relation(fields: [course_id], references: [id])
-  institution_id String
-  institution    Institution  @relation(fields: [institution_id], references: [id])
-  description    String
-  enrollment     Enrollment[]
-  created_at     DateTime     @default(now())
-  requireemployeeId Boolean @default(false)
+  id                String       @id @default(uuid())
+  course_id         String
+  course            Course       @relation(fields: [course_id], references: [id])
+  institution_id    String
+  institution       Institution  @relation(fields: [institution_id], references: [id])
+  description       String
+  enrollment        Enrollment[]
+  created_at        DateTime     @default(now())
+  requireemployeeId Boolean      @default(false)
 
   @@unique([course_id, institution_id, description])
 }
@@ -68,20 +68,11 @@ model Enrollment {
 
 // 0: john-doe/waiting, 1: john-doe/confirmed, 2: john-doe/active
 model EnrollmentStatus {
-  id                        String               @id @default(uuid())
-  enrollment_id             String
-  enrollment                Enrollment           @relation(fields: [enrollment_id], references: [id])
-  enrollment_status_type_id String
-  enrollment_status_type    EnrollmentStatusType @relation(fields: [enrollment_status_type_id], references: [id])
-  created_at                DateTime             @default(now())
-}
-
-// 0: sent, 1: confirmed, 2: active, 3: finished
-model EnrollmentStatusType {
-  id                String             @id @default(uuid())
-  name              String @unique
-  enrollment_status EnrollmentStatus[]
-  created_at        DateTime           @default(now())
+  id                     String     @id @default(uuid())
+  enrollment_id          String
+  enrollment             Enrollment @relation(fields: [enrollment_id], references: [id])
+  enrollment_status_type String     @default("Sent")
+  created_at             DateTime   @default(now())
 }
 
 model Administrator {

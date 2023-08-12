@@ -13,8 +13,7 @@ type SyncReportItem = {
 
 async function updateEnrollmentStatusIfNecessary(
   enrollment: Enrollment,
-  enrollmentStatusType: string,
-  enrollmentConfirmedStatusTypeId: string
+  enrollmentStatusType: string
 ) {
   if (enrollmentStatusType == "Sent") {
     await prisma.enrollment.update({
@@ -25,7 +24,7 @@ async function updateEnrollmentStatusIfNecessary(
         enrollment_status: {
           create: [
             {
-              enrollment_status_type_id: enrollmentConfirmedStatusTypeId,
+              enrollment_status_type: "Confirmed",
             },
           ],
         },
@@ -51,9 +50,6 @@ async function getCourseClass(id: string) {
             take: 1,
             orderBy: {
               created_at: "desc",
-            },
-            include: {
-              enrollment_status_type: true,
             },
           },
         },
@@ -96,27 +92,19 @@ async function getMoodleCourseEnrollments(id: string) {
   const syncReport: SyncReportItem[] = [];
 
   if (courseClass) {
-    const enrollmentConfirmedStatusType =
-      await prisma.enrollmentStatusType.findUnique({
-        where: {
-          name: "Confirmed",
-        },
-      });
-
     const enrollments = courseClass.enrollment;
     enrollments.map(async (enrollment) => {
       const index = json.findIndex(
         (item) => item.username == enrollment.student.cpf
       );
       const lastEnrollmentStatusType =
-        enrollment.enrollment_status[0].enrollment_status_type.name;
+        enrollment.enrollment_status[0].enrollment_status_type;
       let nextEnrollmentStatusType = lastEnrollmentStatusType;
 
       if (index >= 0) {
         nextEnrollmentStatusType = await updateEnrollmentStatusIfNecessary(
           enrollment,
-          lastEnrollmentStatusType,
-          enrollmentConfirmedStatusType!.id
+          lastEnrollmentStatusType
         );
       }
 
