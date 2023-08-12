@@ -1,5 +1,6 @@
 import {
   CourseClassStudentsDAO,
+  CourseClassStudentsDAOArray,
   EnrollmentStatusType,
 } from "@/app/dao/CourseClassStudentsDAO";
 import CourseClassStudentsList from "@/components/CourseClassStudentsList";
@@ -30,7 +31,6 @@ async function getCourseClass(id: string) {
             },
           },
         },
-        //        take: 10,
         orderBy: [
           {
             student: {
@@ -54,6 +54,7 @@ export default async function AdminCourseClassPage({
   const courseClassId = params.id;
   const courseClass = await getCourseClass(courseClassId);
   const dao: CourseClassStudentsDAO[] = [];
+  const daoArray: CourseClassStudentsDAOArray[] = [];
   if (courseClass) {
     courseClass.enrollment.map((enrollment) => {
       dao.push({
@@ -66,6 +67,19 @@ export default async function AdminCourseClassPage({
         lastName: enrollment.student.last_name,
         selected: false,
       });
+
+      // daoArray.push({
+      //   id: enrollment.id,
+      //   data: {
+      //     status: enrollment.enrollment_status[0].enrollment_status_type
+      //       .name as EnrollmentStatusType,
+      //     email: enrollment.student.email,
+      //     cpf: enrollment.student.cpf,
+      //     name: enrollment.student.name,
+      //     lastName: enrollment.student.last_name,
+      //     selected: false,
+      //   },
+      // });
     });
   }
 

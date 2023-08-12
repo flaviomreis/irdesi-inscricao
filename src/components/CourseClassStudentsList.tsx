@@ -58,7 +58,7 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
 
   return (
     <div>
-      <div className="flex bg-gray-200 gap-2 p-4 rounded-lg border border-gray-400 mb-4">
+      <div className="flex items-start flex-col md:items-center md:flex-row bg-gray-200 gap-2 p-4 rounded-lg border border-gray-400 mb-4">
         Status da pré-inscrição
         <label>
           <input
@@ -100,13 +100,12 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
           />
           Concluída
         </label>
-        <div className="h-[1px] border border-gray-400"></div>
-        {/* <Link
+        <a
           href={`/admin/enrollmentssync/${courseClassId}`}
-          className="flex items-center justify-center w-full md:flex-1 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
+          className="flex items-center justify-center w-full md:w-max md:px-2 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
         >
           Sincronizar
-        </Link> */}
+        </a>
       </div>
 
       <div className="flex-1">
