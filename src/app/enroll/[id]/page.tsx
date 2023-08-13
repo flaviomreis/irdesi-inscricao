@@ -1,9 +1,10 @@
 import Image from "next/image";
 import EnrollmentForm from "@/components/EnrollmentForm";
 import EnrollmentWithEmployeeIdForm from "@/components/EnrollmentWithEmployeeIdForm";
+import { buildUrl } from "@/utils/buildUrl";
 
 async function getCourseClass(id: string) {
-  const result = await fetch(`/api/courseclasses/${id}`, {
+  const result = await fetch(buildUrl(`api/courseclasses/${id}`), {
     cache: "no-store",
   });
 

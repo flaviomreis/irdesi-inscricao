@@ -443,7 +443,7 @@ export async function POST(request: NextRequest) {
       enrollment_status: {
         create: [
           {
-            enrollment_status_type_id: "Sent",
+            enrollment_status_type: "Sent",
           },
         ],
       },
