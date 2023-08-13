@@ -1,7 +1,7 @@
 "use client";
 
 import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import FilterIcon from "./FilterIcon";
 import { useRouter } from "next/navigation";
 import DownloadButton from "./DownloadButton";
@@ -21,7 +21,6 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
   const router = useRouter();
 
   useMemo(() => {
-    console.log("filtrando-incrível é server e client side ao mesmo tempo");
     setItems(applyFilter());
   }, []);
 
@@ -63,7 +62,6 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
     const result = await fetch(`/api/enrollmentssync/${courseClassId}`);
     if (result.status !== 200) {
       const json = await result.json();
-      console.log(json);
     }
     router.back();
   }
@@ -93,7 +91,19 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
       }
     );
 
-    console.log(await result.text());
+    let filename = zip ? "download.zip" : "download.csv";
+    const header = result.headers.get("content-disposition");
+    if (header != null) {
+      filename = header.replace("attachment; filename=", "");
+    }
+
+    const href = window.URL.createObjectURL(await result.blob());
+    const link = document.createElement("a");
+    link.href = href;
+    link.setAttribute("download", filename); //or any other extension
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   return (

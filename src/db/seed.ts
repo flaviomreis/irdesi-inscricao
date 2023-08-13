@@ -97,7 +97,7 @@ async function seed() {
   console.log({ administratorKaty, administratorFlavio });
 }
 
-console.log("seedig...");
+console.log("seeding...");
 seed()
   .then(async () => {
     await prisma.$disconnect();

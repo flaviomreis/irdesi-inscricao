@@ -19,7 +19,7 @@ export default function DownloadButton({ courseClassId, handleButton }: Props) {
         onClick={() => handleButton(zip, groups)}
         className="flex items-center justify-center w-full md:flex-1 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
       >
-        Inscrever
+        Download
       </button>
       <label className="px-4">
         <input
