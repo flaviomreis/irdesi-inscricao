@@ -12,12 +12,14 @@ type Props = {
 };
 
 export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
-  const [sentChecked, setSentChecked] = useState(true);
+  const [sentChecked, setSentChecked] = useState(false);
   const [confirmedChecked, setConfirmedChecked] = useState(false);
   const [activeChecked, setActiveChecked] = useState(false);
   const [finishedChecked, setFinishedChecked] = useState(false);
   const [checkAll, setCheckAll] = useState(false);
   const [items, setItems] = useState<CourseClassStudentsDAO[]>(dao);
+  const [totalSent, setTotalSent] = useState(0);
+  const [totalConfirmed, setTotalConfirmed] = useState(0);
   const router = useRouter();
 
   useMemo(() => {
@@ -36,14 +38,20 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
   }, [sentChecked, confirmedChecked, activeChecked, finishedChecked]);
 
   function applyFilter() {
+    let _totalSent = 0;
+    let _totalConfirmed = 0;
     const filter = dao.filter((item) => {
       if (item.status == "Sent" && sentChecked) {
+        _totalSent++;
         return true;
       }
       if (item.status == "Confirmed" && confirmedChecked) {
+        _totalConfirmed++;
         return true;
       }
     });
+    setTotalSent(_totalSent);
+    setTotalConfirmed(_totalConfirmed);
     return filter;
   }
 
@@ -118,7 +126,7 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
             name="sentCheck"
             onChange={(e) => handleChecks(e.target)}
           />
-          Enviada
+          Enviada ({totalSent})
         </label>
         <label>
           <input
@@ -128,7 +136,7 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
             name="confirmedCheck"
             onChange={(e) => handleChecks(e.target)}
           />
-          Confirmada
+          Confirmada ({totalConfirmed})
         </label>
         <label>
           <input
@@ -138,7 +146,7 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
             name="activeCheck"
             onChange={(e) => handleChecks(e.target)}
           />
-          Ativa
+          Ativa (0)
         </label>
         <label>
           <input
@@ -148,7 +156,7 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
             name="finishedCheck"
             onChange={(e) => handleChecks(e.target)}
           />
-          Concluída
+          Concluída (0)
         </label>
         <button
           className="flex items-center justify-center w-full md:w-max md:px-2 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
@@ -158,7 +166,12 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
         </button>
       </div>
 
-      <div className="flex-1 mb-2">
+      <DownloadButton
+        courseClassId={courseClassId}
+        handleButton={handleButton}
+      />
+
+      <div className="flex-1 mt-2">
         <table className="min-w-full text-left">
           <thead className="border-b border-gray-400">
             <tr className="flex flex-col md:flex-row">
@@ -211,10 +224,6 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
           </tbody>
         </table>
       </div>
-      <DownloadButton
-        courseClassId={courseClassId}
-        handleButton={handleButton}
-      />
     </div>
   );
 }
