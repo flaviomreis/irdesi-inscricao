@@ -64,6 +64,7 @@ export default async function AdminCourseClassPage({
         name: enrollment.student.name,
         lastName: enrollment.student.last_name,
         selected: false,
+        error: null,
       });
 
       // daoArray.push({
@@ -88,7 +89,11 @@ export default async function AdminCourseClassPage({
         Turma: {courseClass?.course.short_name} ({courseClass?.description})
       </h2>
       <h2>Estudantes:</h2>
-      <CourseClassStudentsList courseClassId={courseClassId} dao={dao} />
+      <CourseClassStudentsList
+        courseClassId={courseClassId}
+        dao={dao}
+        city={courseClass?.institution.short_name!}
+      />
     </div>
   );
 }

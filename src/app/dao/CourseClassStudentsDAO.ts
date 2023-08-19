@@ -6,6 +6,7 @@ export type CourseClassStudentsDAO = {
   name: string;
   lastName: string;
   selected: boolean;
+  error: string | null;
 };
 
 export type CourseClassStudentsDAOArray = {

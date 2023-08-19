@@ -2,16 +2,20 @@
 
 import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
 import React, { useEffect, useMemo, useState } from "react";
-import FilterIcon from "./FilterIcon";
 import { useRouter } from "next/navigation";
 import DownloadButton from "./DownloadButton";
 
 type Props = {
   courseClassId: string;
   dao: CourseClassStudentsDAO[];
+  city: string;
 };
 
-export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
+export default function CourseClassStudentsList({
+  courseClassId,
+  dao,
+  city,
+}: Props) {
   const [sentChecked, setSentChecked] = useState(false);
   const [confirmedChecked, setConfirmedChecked] = useState(false);
   const [activeChecked, setActiveChecked] = useState(false);
@@ -114,6 +118,26 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
     document.body.removeChild(link);
   }
 
+  async function handleEnrollInCourseClassButton() {
+    items.map(async (item) => {
+      if (item.selected) {
+        const result = await fetch(`/api/enrollincourseclass`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            item,
+            city,
+          }),
+        });
+        const json = await result.json();
+        item.error = json.error;
+        console.log(json.error);
+      }
+    });
+  }
+
   return (
     <div>
       <div className="flex items-start flex-col md:items-center md:flex-row bg-gray-200 gap-2 p-4 rounded-lg border border-gray-400 mb-4">
@@ -158,12 +182,20 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
           />
           Concluída (0)
         </label>
-        <button
-          className="flex items-center justify-center w-full md:w-max md:px-2 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
-          onClick={handleSyncButton}
-        >
-          Sincronizar
-        </button>
+        <div className="flex md:flex-1 w-full justify-between items-center">
+          <button
+            className="flex items-center justify-center w-full md:w-max md:px-2 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
+            onClick={handleSyncButton}
+          >
+            Sincronizar
+          </button>
+          <button
+            className="flex items-center justify-center w-full md:w-max md:px-2 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
+            onClick={handleEnrollInCourseClassButton}
+          >
+            Inscrever
+          </button>
+        </div>
       </div>
 
       <DownloadButton
@@ -213,6 +245,7 @@ export default function CourseClassStudentsList({ courseClassId, dao }: Props) {
                     )}
                     <a href={`/admin/enrollment/${enrollment.id}`}>
                       {enrollment.cpf}
+                      {!enrollment.error ? "" : ` [${enrollment.error}]`}
                     </a>
                   </td>
                   <td className="md:w-[30%]">{enrollment.email}</td>
