@@ -1,34 +1,33 @@
 "use client";
 
 import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DownloadButton from "./DownloadButton";
 
 type Props = {
   courseClassId: string;
   dao: CourseClassStudentsDAO[];
-  city: string;
+  total: {
+    sentTotal: number;
+    confirmedTotal: number;
+  };
+  handleSubscribe: () => void;
 };
 
 export default function CourseClassStudentsList({
   courseClassId,
   dao,
-  city,
+  total,
+  handleSubscribe,
 }: Props) {
   const [sentChecked, setSentChecked] = useState(false);
   const [confirmedChecked, setConfirmedChecked] = useState(false);
   const [activeChecked, setActiveChecked] = useState(false);
   const [finishedChecked, setFinishedChecked] = useState(false);
   const [checkAll, setCheckAll] = useState(false);
-  const [items, setItems] = useState<CourseClassStudentsDAO[]>(dao);
-  const [totalSent, setTotalSent] = useState(0);
-  const [totalConfirmed, setTotalConfirmed] = useState(0);
   const router = useRouter();
-
-  useMemo(() => {
-    setItems(applyFilter());
-  }, []);
+  const [items, setItems] = useState<CourseClassStudentsDAO[]>(applyFilter());
 
   function handleChecks(e: HTMLInputElement) {
     e.name == "sentCheck" && setSentChecked(!sentChecked);
@@ -42,20 +41,14 @@ export default function CourseClassStudentsList({
   }, [sentChecked, confirmedChecked, activeChecked, finishedChecked]);
 
   function applyFilter() {
-    let _totalSent = 0;
-    let _totalConfirmed = 0;
     const filter = dao.filter((item) => {
       if (item.status == "Sent" && sentChecked) {
-        _totalSent++;
         return true;
       }
       if (item.status == "Confirmed" && confirmedChecked) {
-        _totalConfirmed++;
         return true;
       }
     });
-    setTotalSent(_totalSent);
-    setTotalConfirmed(_totalConfirmed);
     return filter;
   }
 
@@ -118,26 +111,6 @@ export default function CourseClassStudentsList({
     document.body.removeChild(link);
   }
 
-  async function handleEnrollInCourseClassButton() {
-    items.map(async (item) => {
-      if (item.selected) {
-        const result = await fetch(`/api/enrollincourseclass`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            item,
-            city,
-          }),
-        });
-        const json = await result.json();
-        item.error = json.error;
-        console.log(json.error);
-      }
-    });
-  }
-
   return (
     <div>
       <div className="flex items-start flex-col md:items-center md:flex-row bg-gray-200 gap-2 p-4 rounded-lg border border-gray-400 mb-4">
@@ -150,7 +123,7 @@ export default function CourseClassStudentsList({
             name="sentCheck"
             onChange={(e) => handleChecks(e.target)}
           />
-          Enviada ({totalSent})
+          Enviada ({total.sentTotal})
         </label>
         <label>
           <input
@@ -160,7 +133,7 @@ export default function CourseClassStudentsList({
             name="confirmedCheck"
             onChange={(e) => handleChecks(e.target)}
           />
-          Confirmada ({totalConfirmed})
+          Confirmada ({total.confirmedTotal})
         </label>
         <label>
           <input
@@ -191,7 +164,7 @@ export default function CourseClassStudentsList({
           </button>
           <button
             className="flex items-center justify-center w-full md:w-max md:px-2 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
-            onClick={handleEnrollInCourseClassButton}
+            onClick={handleSubscribe}
           >
             Inscrever
           </button>

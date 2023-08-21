@@ -68,27 +68,30 @@ type ResultType = {
 
 async function getMoodleCourseEnrollments(id: string): Promise<ResultType[]> {
   const token = process.env.MOODLE_GET_TOKEN;
-  // const result = await fetch(
-  //   `https://irdesieducacao.com.br/ava/webservice/rest/server.php?wstoken=${token}&moodlewsrestformat=json&wsfunction=core_enrol_get_enrolled_users&courseid=${id}`
-  // );
+  const result = await fetch(
+    `https://irdesieducacao.com.br/ava/webservice/rest/server.php?wstoken=${token}&moodlewsrestformat=json&wsfunction=core_enrol_get_enrolled_users&courseid=${id}`,
+    {
+      cache: "no-store",
+    }
+  );
 
-  // const json = (await result.json()) as ResultType[];
-  const json: ResultType[] = [
-    {
-      id: "1",
-      username: "92721745034",
-      firstname: "Flávio",
-      lastname: "Reis",
-      email: "flaviomreis@gmail.com",
-    },
-    {
-      id: "2",
-      username: "01698160011",
-      firstname: "Catarini",
-      lastname: "Reis",
-      email: "catarinicreis@gmail.com",
-    },
-  ];
+  const json = (await result.json()) as ResultType[];
+  // const json: ResultType[] = [
+  //   {
+  //     id: "1",
+  //     username: "92721745034",
+  //     firstname: "Flávio",
+  //     lastname: "Reis",
+  //     email: "flaviomreis@gmail.com",
+  //   },
+  //   {
+  //     id: "2",
+  //     username: "01698160011",
+  //     firstname: "Catarini",
+  //     lastname: "Reis",
+  //     email: "catarinicreis@gmail.com",
+  //   },
+  // ];
 
   return json;
 }
@@ -127,6 +130,8 @@ export async function GET(
   }
 
   const enrollments = courseClass.enrollment;
+  console.log(json.length);
+  console.log(enrollments.length);
 
   for (let i = 0; i < json.length; i++) {
     const enrollment = enrollments.find(

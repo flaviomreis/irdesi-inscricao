@@ -1,13 +1,11 @@
 import {
   CourseClassStudentsDAO,
-  CourseClassStudentsDAOArray,
   EnrollmentStatusType,
 } from "@/app/dao/CourseClassStudentsDAO";
 import CourseClassStudentsList from "@/components/CourseClassStudentsList";
-import DownloadButton from "@/components/DownloadButton";
+import CourseClassSubscribe from "@/components/CourseClassSubscribe";
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
-import { useRouter } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração de Pré-Inscrições",
@@ -52,13 +50,17 @@ export default async function AdminCourseClassPage({
   const courseClassId = params.id;
   const courseClass = await getCourseClass(courseClassId);
   const dao: CourseClassStudentsDAO[] = [];
-  const daoArray: CourseClassStudentsDAOArray[] = [];
+  let sentTotal = 0;
+  let confirmedTotal = 0;
+
   if (courseClass) {
     courseClass.enrollment.map((enrollment) => {
+      const status = enrollment.enrollment_status[0]
+        .enrollment_status_type as EnrollmentStatusType;
+
       dao.push({
         id: enrollment.id,
-        status: enrollment.enrollment_status[0]
-          .enrollment_status_type as EnrollmentStatusType,
+        status,
         email: enrollment.student.email,
         cpf: enrollment.student.cpf,
         name: enrollment.student.name,
@@ -66,19 +68,8 @@ export default async function AdminCourseClassPage({
         selected: false,
         error: null,
       });
-
-      // daoArray.push({
-      //   id: enrollment.id,
-      //   data: {
-      //     status: enrollment.enrollment_status[0].enrollment_status_type
-      //       .name as EnrollmentStatusType,
-      //     email: enrollment.student.email,
-      //     cpf: enrollment.student.cpf,
-      //     name: enrollment.student.name,
-      //     lastName: enrollment.student.last_name,
-      //     selected: false,
-      //   },
-      // });
+      status == "Sent" && sentTotal++;
+      status == "Confirmed" && confirmedTotal++;
     });
   }
 
@@ -89,10 +80,11 @@ export default async function AdminCourseClassPage({
         Turma: {courseClass?.course.short_name} ({courseClass?.description})
       </h2>
       <h2>Estudantes:</h2>
-      <CourseClassStudentsList
+      <CourseClassSubscribe
         courseClassId={courseClassId}
         dao={dao}
         city={courseClass?.institution.short_name!}
+        total={{ sentTotal, confirmedTotal }}
       />
     </div>
   );
