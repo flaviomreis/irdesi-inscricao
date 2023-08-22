@@ -4,6 +4,7 @@ import { authOptions } from "../auth/[...nextauth]/route";
 import isAdministrator from "@/utils/is-administrator";
 import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
 import { prisma } from "@/db/connection";
+import sendMoodleRequest from "@/utils/moodle-request";
 
 async function setEnrollmentStatusAsConfirmed(id: string, status: string) {
   if (status == "Sent") {
@@ -157,25 +158,4 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   }
-}
-
-async function sendMoodleRequest(params: any) {
-  const formBody = [];
-  for (const [key, value] of Object.entries(params)) {
-    var encodedKey = encodeURIComponent(key);
-    var encodedValue = encodeURIComponent(value as string | number);
-    formBody.push(encodedKey + "=" + encodedValue);
-  }
-  const formBodyString = formBody.join("&");
-
-  const result = await fetch(
-    "https://irdesieducacao.com.br/ava/webservice/rest/server.php",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formBodyString,
-    }
-  );
-  const json = await result.json();
-  return json;
 }
