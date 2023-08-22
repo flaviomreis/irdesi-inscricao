@@ -32,8 +32,6 @@ export default function CourseClassSubscribe({
   const [items, setItems] = useState<CourseClassStudentsDAO[]>(applyFilter());
   const [checkAll, setCheckAll] = useState(false);
 
-  console.log("renderizou");
-
   function applyFilter() {
     const filter = dao.filter((item) => {
       if (item.status == "Sent" && sentChecked) {
@@ -101,7 +99,6 @@ export default function CourseClassSubscribe({
       city={city}
       total={total}
       items={items}
-      subscribing={subscribing}
       showSubscribeReport={showSubscribeReport}
       sentChecked={sentChecked}
       confirmedChecked={confirmedChecked}

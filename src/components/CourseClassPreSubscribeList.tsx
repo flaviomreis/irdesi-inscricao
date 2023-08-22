@@ -1,7 +1,7 @@
 "use client";
 
 import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
-import { useState } from "react";
+import { cache, useState } from "react";
 import { useRouter } from "next/navigation";
 import DownloadButton from "./DownloadButton";
 
@@ -13,7 +13,6 @@ type Props = {
     confirmedTotal: number;
   };
   items: CourseClassStudentsDAO[];
-  subscribing: boolean;
   showSubscribeReport: () => void;
   sentChecked: boolean;
   confirmedChecked: boolean;
@@ -31,6 +30,7 @@ type Props = {
 
 export default function CourseClassPreSubscribeList(props: Props) {
   const [synchronizing, setSynchronizing] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
   const router = useRouter();
 
   function handleChecks(e: HTMLInputElement) {
@@ -53,6 +53,7 @@ export default function CourseClassPreSubscribeList(props: Props) {
   }
 
   async function handleSubscribeButton() {
+    setSubscribing(true);
     props.items.map(async (item) => {
       if (item.selected) {
         const result = await fetch(`/api/enrollincourseclass`, {
@@ -64,13 +65,14 @@ export default function CourseClassPreSubscribeList(props: Props) {
             item,
             city: props.city,
           }),
+        }).then(async (result) => {
+          result.json().then((json) => {
+            item.error = json.error;
+            props.showSubscribeReport();
+          });
         });
-        const json = await result.json();
-        item.error = await json.error;
       }
     });
-    console.log(props.items);
-    props.showSubscribeReport();
   }
 
   async function handleDownloadButton(zip: boolean, groups: number) {
@@ -157,10 +159,10 @@ export default function CourseClassPreSubscribeList(props: Props) {
           </button>
           <button
             className="flex items-center justify-center w-full md:w-max md:px-2 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
-            disabled={props.subscribing}
+            disabled={subscribing}
             onClick={handleSubscribeButton}
           >
-            {props.subscribing ? "Inscrevendo" : "Inscrever"}
+            {subscribing ? "Inscrevendo" : "Inscrever"}
           </button>
         </div>
       </div>
