@@ -192,7 +192,10 @@ export default function CourseClassPreSubscribeList(props: Props) {
           <tbody>
             {props.items.map((enrollment) => {
               return (
-                <tr key={enrollment.id} className="flex flex-col md:flex-row">
+                <tr
+                  key={enrollment.id}
+                  className="flex flex-col md:flex-row even:bg-white odd:bg-gray-200"
+                >
                   <td className="flex items-center gap-2 md:w-[20%]">
                     <input
                       type="checkbox"
@@ -213,7 +216,7 @@ export default function CourseClassPreSubscribeList(props: Props) {
                       <div className="h-2 w-2 rounded-full bg-black"></div>
                     )}
                     <a href={`/admin/enrollment/${enrollment.id}`}>
-                      {enrollment.cpf}-{enrollment.error}
+                      {enrollment.cpf}
                     </a>
                   </td>
                   <td className="md:w-[30%]">{enrollment.email}</td>
