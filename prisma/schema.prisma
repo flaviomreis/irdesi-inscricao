@@ -14,6 +14,7 @@ model Course {
   id           String        @id @default(uuid())
   name         String
   short_name   String        @unique
+  moodle_id    String        @unique
   course_class CourseClass[]
   created_at   DateTime      @default(now())
 }

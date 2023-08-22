@@ -1,89 +1,81 @@
 "use client";
 
 import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import DownloadButton from "./DownloadButton";
 
 type Props = {
   courseClassId: string;
-  dao: CourseClassStudentsDAO[];
+  city: string;
   total: {
     sentTotal: number;
     confirmedTotal: number;
   };
-  handleSubscribe: () => void;
+  items: CourseClassStudentsDAO[];
+  subscribing: boolean;
+  showSubscribeReport: () => void;
+  sentChecked: boolean;
+  confirmedChecked: boolean;
+  activeChecked: boolean;
+  finishedChecked: boolean;
+  checkAll: boolean;
+  toogleSentChecked: () => boolean;
+  toogleConfirmedChecked: () => boolean;
+  toogleActiveChecked: () => boolean;
+  toogleFinishedChecked: () => boolean;
+  handleOnSelectChange: (id: string) => void;
+  handleCheckAll: () => void;
+  courseClassMoodleId: string;
 };
 
-export default function CourseClassStudentsList({
-  courseClassId,
-  dao,
-  total,
-  handleSubscribe,
-}: Props) {
-  const [sentChecked, setSentChecked] = useState(false);
-  const [confirmedChecked, setConfirmedChecked] = useState(false);
-  const [activeChecked, setActiveChecked] = useState(false);
-  const [finishedChecked, setFinishedChecked] = useState(false);
-  const [checkAll, setCheckAll] = useState(false);
+export default function CourseClassPreSubscribeList(props: Props) {
+  const [synchronizing, setSynchronizing] = useState(false);
   const router = useRouter();
-  const [items, setItems] = useState<CourseClassStudentsDAO[]>(applyFilter());
 
   function handleChecks(e: HTMLInputElement) {
-    e.name == "sentCheck" && setSentChecked(!sentChecked);
-    e.name == "confirmedCheck" && setConfirmedChecked(!confirmedChecked);
-    e.name == "activeCheck" && setActiveChecked(!activeChecked);
-    e.name == "finishedCheck" && setFinishedChecked(!finishedChecked);
-  }
-
-  useEffect(() => {
-    setItems(applyFilter());
-  }, [sentChecked, confirmedChecked, activeChecked, finishedChecked]);
-
-  function applyFilter() {
-    const filter = dao.filter((item) => {
-      if (item.status == "Sent" && sentChecked) {
-        return true;
-      }
-      if (item.status == "Confirmed" && confirmedChecked) {
-        return true;
-      }
-    });
-    return filter;
-  }
-
-  function handleOnSelectChange(id: string) {
-    setItems(
-      items.map((item) => {
-        if (item.id === id) {
-          item.selected = !item.selected;
-        }
-        return item;
-      })
-    );
+    e.name == "sentCheck" && props.toogleSentChecked();
+    e.name == "confirmedCheck" && props.toogleConfirmedChecked();
+    e.name == "activeCheck" && props.toogleActiveChecked();
+    e.name == "finishedCheck" && props.toogleFinishedChecked();
   }
 
   async function handleSyncButton() {
-    const result = await fetch(`/api/enrollmentssync/${courseClassId}`);
+    setSynchronizing(true);
+    const result = await fetch(
+      `/api/enrollmentssync/${props.courseClassId}?moodle_id=${props.courseClassMoodleId}`
+    );
     if (result.status !== 200) {
       const json = await result.json();
     }
+    setSynchronizing(false);
     router.back();
   }
 
-  function handleCheckAll() {
-    setCheckAll(!checkAll);
-    setItems(
-      items.map((item) => {
-        item.selected = !checkAll;
-        return item;
-      })
-    );
+  async function handleSubscribeButton() {
+    props.items.map(async (item) => {
+      if (item.selected) {
+        const result = await fetch(`/api/enrollincourseclass`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            item,
+            city: props.city,
+          }),
+        });
+        const json = await result.json();
+        item.error = await json.error;
+      }
+    });
+    console.log(props.items);
+    props.showSubscribeReport();
   }
 
-  async function handleButton(zip: boolean, groups: number) {
+  async function handleDownloadButton(zip: boolean, groups: number) {
     const result = await fetch(
-      `/api/download/${courseClassId}?checked=${zip}&groups=${groups}`,
+      `/api/download/${props.courseClassId}?checked=${zip}&groups=${groups}`,
       {
         method: "POST",
         headers: {
@@ -91,7 +83,7 @@ export default function CourseClassStudentsList({
           Accept: "text/csv",
         },
         body: JSON.stringify({
-          dao: items,
+          dao: props.items,
         }),
       }
     );
@@ -119,27 +111,27 @@ export default function CourseClassStudentsList({
           <input
             type="checkbox"
             className="w-4 h-4 m-1 rounded-full text-yellow-400 focus:ring-yellow-400 accent-yellow-400 border border-yellow-400"
-            checked={sentChecked}
+            checked={props.sentChecked}
             name="sentCheck"
             onChange={(e) => handleChecks(e.target)}
           />
-          Enviada ({total.sentTotal})
+          Enviada ({props.total.sentTotal})
         </label>
         <label>
           <input
             type="checkbox"
             className="w-4 h-4 m-1 rounded-full text-blue-500 focus:ring-blue-500 accent-blue-500 border border-blue-500"
-            checked={confirmedChecked}
+            checked={props.confirmedChecked}
             name="confirmedCheck"
             onChange={(e) => handleChecks(e.target)}
           />
-          Confirmada ({total.confirmedTotal})
+          Confirmada ({props.total.confirmedTotal})
         </label>
         <label>
           <input
             type="checkbox"
             className="w-4 h-4 m-1 rounded-full text-green-500 focus:ring-green-500 accent-green-500 border border-green-500"
-            checked={activeChecked}
+            checked={props.activeChecked}
             name="activeCheck"
             onChange={(e) => handleChecks(e.target)}
           />
@@ -149,7 +141,7 @@ export default function CourseClassStudentsList({
           <input
             type="checkbox"
             className="w-4 h-4 m-1 rounded-full text-black focus:ring-black accent-black border border-black"
-            checked={finishedChecked}
+            checked={props.finishedChecked}
             name="finishedCheck"
             onChange={(e) => handleChecks(e.target)}
           />
@@ -158,43 +150,45 @@ export default function CourseClassStudentsList({
         <div className="flex md:flex-1 w-full justify-between items-center">
           <button
             className="flex items-center justify-center w-full md:w-max md:px-2 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
+            disabled={synchronizing}
             onClick={handleSyncButton}
           >
-            Sincronizar
+            {synchronizing ? "Sincronizando" : "Sincronizar"}
           </button>
           <button
             className="flex items-center justify-center w-full md:w-max md:px-2 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
-            onClick={handleSubscribe}
+            disabled={props.subscribing}
+            onClick={handleSubscribeButton}
           >
-            Inscrever
+            {props.subscribing ? "Inscrevendo" : "Inscrever"}
           </button>
         </div>
       </div>
 
       <DownloadButton
-        courseClassId={courseClassId}
-        handleButton={handleButton}
+        courseClassId={props.courseClassId}
+        handleButton={handleDownloadButton}
       />
 
       <div className="flex-1 mt-2">
         <table className="min-w-full text-left">
           <thead className="border-b border-gray-400">
             <tr className="flex flex-col md:flex-row">
-              <th className="flex items-center gap-1 md:w-[20%]">
+              <th className="flex items-center gap-1 md:w-[15%]">
                 <input
                   type="checkbox"
-                  checked={checkAll}
-                  onChange={handleCheckAll}
+                  checked={props.checkAll}
+                  onChange={props.handleCheckAll}
                 />
                 CPF
               </th>
-              <th className="md:w-[30%]">email</th>
-              <th className="md:w-[30%]">Nome</th>
-              <th className="md:w-[20%]">Sobrenome</th>
+              <th className="md:w-[25%]">email</th>
+              <th className="md:w-[35%]">Nome</th>
+              <th className="md:w-[25%]">Sobrenome</th>
             </tr>
           </thead>
           <tbody>
-            {items.map((enrollment) => {
+            {props.items.map((enrollment) => {
               return (
                 <tr key={enrollment.id} className="flex flex-col md:flex-row">
                   <td className="flex items-center gap-2 md:w-[20%]">
@@ -202,7 +196,7 @@ export default function CourseClassStudentsList({
                       type="checkbox"
                       id={`checkbox-${enrollment.id}`}
                       checked={enrollment.selected}
-                      onChange={() => handleOnSelectChange(enrollment.id)}
+                      onChange={() => props.handleOnSelectChange(enrollment.id)}
                     />
                     {enrollment.status == "Sent" && (
                       <div className="h-2 w-2 rounded-full bg-yellow-400"></div>
@@ -217,8 +211,7 @@ export default function CourseClassStudentsList({
                       <div className="h-2 w-2 rounded-full bg-black"></div>
                     )}
                     <a href={`/admin/enrollment/${enrollment.id}`}>
-                      {enrollment.cpf}
-                      {!enrollment.error ? "" : ` [${enrollment.error}]`}
+                      {enrollment.cpf}-{enrollment.error}
                     </a>
                   </td>
                   <td className="md:w-[30%]">{enrollment.email}</td>

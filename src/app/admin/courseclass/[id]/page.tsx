@@ -2,7 +2,6 @@ import {
   CourseClassStudentsDAO,
   EnrollmentStatusType,
 } from "@/app/dao/CourseClassStudentsDAO";
-import CourseClassStudentsList from "@/components/CourseClassStudentsList";
 import CourseClassSubscribe from "@/components/CourseClassSubscribe";
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
@@ -74,18 +73,21 @@ export default async function AdminCourseClassPage({
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-2">
-      <h2>Contrato: {courseClass?.institution.short_name}</h2>
-      <h2>
-        Turma: {courseClass?.course.short_name} ({courseClass?.description})
-      </h2>
-      <h2>Estudantes:</h2>
-      <CourseClassSubscribe
-        courseClassId={courseClassId}
-        dao={dao}
-        city={courseClass?.institution.short_name!}
-        total={{ sentTotal, confirmedTotal }}
-      />
-    </div>
+    courseClass && (
+      <div className="flex flex-1 flex-col gap-2">
+        <h2>Contrato: {courseClass.institution.short_name}</h2>
+        <h2>
+          Turma: {courseClass.course.short_name} ({courseClass.description})
+        </h2>
+        <h2>Estudantes:</h2>
+        <CourseClassSubscribe
+          courseClassId={courseClassId}
+          courseClassMoodleId={courseClass.course.moodle_id}
+          dao={dao}
+          city={courseClass?.institution.short_name!}
+          total={{ sentTotal, confirmedTotal }}
+        />
+      </div>
+    )
   );
 }

@@ -111,6 +111,14 @@ export async function GET(
   }
 
   const id = params.id;
+  const moodle_id = request.nextUrl.searchParams.get("moodle_id") as string;
+  if (!moodle_id) {
+    return NextResponse.json(
+      { error: `O id do curso no Moodle não foi enviado.` },
+      { status: 401 }
+    );
+  }
+
   const courseClass = await getCourseClass(id);
 
   if (!courseClass) {
@@ -120,7 +128,7 @@ export async function GET(
     );
   }
 
-  const json = await getMoodleCourseEnrollments("2");
+  const json = await getMoodleCourseEnrollments(moodle_id);
 
   if (!json) {
     return NextResponse.json(
@@ -130,8 +138,6 @@ export async function GET(
   }
 
   const enrollments = courseClass.enrollment;
-  console.log(json.length);
-  console.log(enrollments.length);
 
   for (let i = 0; i < json.length; i++) {
     const enrollment = enrollments.find(
@@ -145,6 +151,7 @@ export async function GET(
       );
     }
   }
+
   return NextResponse.json(
     { error: "Sincronização concluída." },
     { status: 200 }
