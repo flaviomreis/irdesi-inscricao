@@ -4,6 +4,7 @@ import { Enrollment } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import sendMoodleRequest from "@/utils/moodle-request";
 
 async function updateEnrollmentStatusIfNecessary(
   enrollment: Enrollment,
@@ -58,41 +59,6 @@ async function getCourseClass(id: string) {
   return result;
 }
 
-type ResultType = {
-  id: string;
-  username: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-};
-
-async function getMoodleCourseEnrollments(id: string): Promise<ResultType[]> {
-  const token = process.env.MOODLE_GET_TOKEN;
-  const result = await fetch(
-    `https://irdesieducacao.com.br/ava/webservice/rest/server.php?wstoken=${token}&moodlewsrestformat=json&wsfunction=core_enrol_get_enrolled_users&courseid=${id}`
-  );
-
-  const json = (await result.json()) as ResultType[];
-  // const json: ResultType[] = [
-  //   {
-  //     id: "1",
-  //     username: "92721745034",
-  //     firstname: "Flávio",
-  //     lastname: "Reis",
-  //     email: "flaviomreis@gmail.com",
-  //   },
-  //   {
-  //     id: "2",
-  //     username: "01698160011",
-  //     firstname: "Catarini",
-  //     lastname: "Reis",
-  //     email: "catarinicreis@gmail.com",
-  //   },
-  // ];
-
-  return json;
-}
-
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -108,6 +74,14 @@ export async function GET(
   }
 
   const id = params.id;
+  const moodle_id = request.nextUrl.searchParams.get("moodle_id") as string;
+  if (!moodle_id) {
+    return NextResponse.json(
+      { error: `O id do curso no Moodle não foi enviado.` },
+      { status: 401 }
+    );
+  }
+
   const courseClass = await getCourseClass(id);
 
   if (!courseClass) {
@@ -117,29 +91,45 @@ export async function GET(
     );
   }
 
-  const json = await getMoodleCourseEnrollments("2");
-
-  if (!json) {
-    return NextResponse.json(
-      { error: `O acesso ao Moodle não retornou dados` },
-      { status: 500 }
-    );
-  }
-
   const enrollments = courseClass.enrollment;
+  enrollments.map(async (enrollment) => {
+    // Consulta se estudante já existe com o CPF como username
+    const findUserParams = {
+      wstoken: process.env.MOODLE_GET_TOKEN!,
+      wsfunction: "core_user_get_users_by_field",
+      moodlewsrestformat: "json",
+      field: "username",
+      "values[0]": enrollment.student.cpf,
+    };
 
-  for (let i = 0; i < json.length; i++) {
-    const enrollment = enrollments.find(
-      (item) => item.student.cpf == json[i].username
-    );
+    const findUserJson = await sendMoodleRequest(findUserParams);
 
-    if (enrollment) {
-      await updateEnrollmentStatusIfNecessary(
-        enrollment,
-        enrollment.enrollment_status[0].enrollment_status_type
-      );
+    if (Array.isArray(findUserJson) && findUserJson.length == 1) {
+      const userId = findUserJson[0].id;
+
+      const findCoursesParams = {
+        wstoken: process.env.MOODLE_GET_TOKEN!,
+        wsfunction: "core_enrol_get_users_courses",
+        moodlewsrestformat: "json",
+        userid: userId,
+      };
+
+      const findCoursesJson = await sendMoodleRequest(findCoursesParams);
+      if (Array.isArray(findCoursesJson) && findUserJson.length > 0) {
+        const index = findCoursesJson.findIndex(
+          (course) => course.id == moodle_id
+        );
+
+        if (index >= 0) {
+          await updateEnrollmentStatusIfNecessary(
+            enrollment,
+            enrollment.enrollment_status[0].enrollment_status_type
+          );
+        }
+      }
     }
-  }
+  });
+
   return NextResponse.json(
     { error: "Sincronização concluída." },
     { status: 200 }

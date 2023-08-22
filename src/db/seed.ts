@@ -8,7 +8,8 @@ async function seed() {
     update: {},
     create: {
       id: "8f0e16a8-235e-11ee-a96f-d708eb376533",
-      short_name: "TEA-1",
+      short_name: "Práticas Inclusivas",
+      moodle_id: "2",
       name: "Práticas Inclusivas para Atendimento a Alunos com TEA",
     },
   });
