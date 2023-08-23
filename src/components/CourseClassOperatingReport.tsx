@@ -2,12 +2,14 @@ import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
 
 type Props = {
   items: CourseClassStudentsDAO[];
+  courseClassId: string;
 };
 
 export default function CourseClassOperatingReport(props: Props) {
   return (
-    <div className="flex-1 mt-2">
-      <table className="min-w-full text-left">
+    <div className="flex-1 mt-2 min-w-full">
+      <p>teste</p>
+      <table className="min-w-full text-left mb-4">
         <thead className="border-b border-gray-400">
           <tr className="flex flex-col md:flex-row">
             <th className="md:w-[15%]">CPF</th>
@@ -32,6 +34,12 @@ export default function CourseClassOperatingReport(props: Props) {
           })}
         </tbody>
       </table>
+      <a
+        href={`/admin/courseclass/${props.courseClassId}`}
+        className="flex items-center justify-center px-4 md:w-40 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
+      >
+        Voltar
+      </a>
     </div>
   );
 }

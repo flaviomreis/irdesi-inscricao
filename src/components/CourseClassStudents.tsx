@@ -113,6 +113,6 @@ export default function CourseClassStudents({
       handleCheckAll={handleCheckAll}
     />
   ) : (
-    <CourseClassOperatingReport items={items} />
+    <CourseClassOperatingReport courseClassId={courseClassId} items={items} />
   );
 }

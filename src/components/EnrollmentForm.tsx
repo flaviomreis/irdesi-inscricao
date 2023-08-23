@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { EnrollmentFormSchema } from "@/schema/EnrollmentFormSchema";
 import { useState } from "react";
 import ConfirmDialog from "./ModalDialog";
-import { baseUrl } from "@/utils/baseurl";
 
 type UserEnrollmentFormData = z.infer<typeof EnrollmentFormSchema>;
 
