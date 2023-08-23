@@ -89,6 +89,25 @@ export default function CourseClassStudentsList(props: Props) {
     });
   }
 
+  // async function handleSubscribeButton() {
+  //   setSubscribing(true);
+  //       const result = await fetch(`/api/enrollincourseclass`, {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           items: props.items,
+  //           city: props.city,
+  //         }),
+  //       }).then(async (result) => {
+  //         result.json().then((json) => {
+  //           item.error = json.error;
+  //           props.showOperatingReport();
+  //         });
+  //       });
+  // }
+
   async function handleDownloadButton(zip: boolean, groups: number) {
     const result = await fetch(
       `/api/download/${props.courseClassId}?checked=${zip}&groups=${groups}`,

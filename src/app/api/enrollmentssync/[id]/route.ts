@@ -1,6 +1,5 @@
 import { prisma } from "@/db/connection";
 import isAdministrator from "@/utils/is-administrator";
-import { Enrollment } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
@@ -232,7 +231,18 @@ export async function PUT(
     );
   }
 
-  if (findUserJson.length != 1) {
+  if (findUserJson.length == 0) {
+    //await updateEnrollmentToSent(enrollment.id);
+    return NextResponse.json(
+      {
+        error:
+          enrollment.enrollment_status[0].enrollment_status_type == "Sent"
+            ? "Aluno não criado no Moodle. Inscrição mantida como Enviada"
+            : "Aluna não criado no Moodle. Inscrição alterada para Enviada",
+      },
+      { status: findUserResult.status }
+    );
+  } else if (findUserJson.length != 1) {
     return NextResponse.json(
       {
         error:
@@ -294,8 +304,8 @@ export async function PUT(
         {
           error:
             enrollment.enrollment_status[0].enrollment_status_type == "Sent"
-              ? "Aluno inscrito em outro curso. Inscrição mantido como Enviada"
-              : "Aluna inscrita em outro curso. Inscrição alterado para Enviada",
+              ? "Aluno inscrito em outro curso. Inscrição mantida como Enviada"
+              : "Aluna inscrita em outro curso. Inscrição alterada para Enviada",
         },
         { status: 200 }
       );
@@ -306,8 +316,8 @@ export async function PUT(
       {
         error:
           enrollment.enrollment_status[0].enrollment_status_type == "Sent"
-            ? "Aluno não inscrito em curso. Inscrição mantido como Enviada"
-            : "Aluno não inscrito em curso. Inscrição alterado para Enviada",
+            ? "Aluno não inscrito em curso. Inscrição mantida como Enviada"
+            : "Aluno não inscrito em curso. Inscrição alterada para Enviada",
       },
       { status: 200 }
     );
