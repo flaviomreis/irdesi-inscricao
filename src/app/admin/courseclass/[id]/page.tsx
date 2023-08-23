@@ -2,7 +2,7 @@ import {
   CourseClassStudentsDAO,
   EnrollmentStatusType,
 } from "@/app/dao/CourseClassStudentsDAO";
-import CourseClassSubscribe from "@/components/CourseClassSubscribe";
+import CourseClassStudents from "@/components/CourseClassStudents";
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
 
@@ -80,7 +80,7 @@ export default async function AdminCourseClassPage({
           Turma: {courseClass.course.short_name} ({courseClass.description})
         </h2>
         <h2>Estudantes:</h2>
-        <CourseClassSubscribe
+        <CourseClassStudents
           courseClassId={courseClassId}
           courseClassMoodleId={courseClass.course.moodle_id}
           dao={dao}

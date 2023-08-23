@@ -1,4 +1,6 @@
-export default async function sendMoodleRequest(params: any) {
+export default async function sendMoodleRequest(
+  params: any
+): Promise<{ result: { ok: boolean; status: number }; json: any }> {
   const formBody = [];
   for (const [key, value] of Object.entries(params)) {
     var encodedKey = encodeURIComponent(key);
@@ -16,5 +18,6 @@ export default async function sendMoodleRequest(params: any) {
     }
   );
   const json = await result.json();
-  return json;
+  //console.log("result", result.ok, result.status);
+  return { result: { ok: result.ok, status: result.status }, json };
 }

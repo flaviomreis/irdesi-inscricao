@@ -4,7 +4,7 @@ type Props = {
   items: CourseClassStudentsDAO[];
 };
 
-export default function CourseClassPosSubscribeList(props: Props) {
+export default function CourseClassOperatingReport(props: Props) {
   return (
     <div className="flex-1 mt-2">
       <table className="min-w-full text-left">
