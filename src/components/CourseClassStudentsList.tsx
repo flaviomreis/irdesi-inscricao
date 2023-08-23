@@ -210,7 +210,7 @@ export default function CourseClassStudentsList(props: Props) {
                   key={enrollment.id}
                   className="flex flex-col md:flex-row even:bg-white odd:bg-gray-200"
                 >
-                  <td className="flex items-center gap-2 md:w-[20%]">
+                  <td className="flex items-center gap-2 md:w-[15%]">
                     <input
                       type="checkbox"
                       id={`checkbox-${enrollment.id}`}
@@ -233,9 +233,9 @@ export default function CourseClassStudentsList(props: Props) {
                       {enrollment.cpf}
                     </a>
                   </td>
-                  <td className="md:w-[30%]">{enrollment.email}</td>
-                  <td className="md:w-[30%]">{enrollment.name}</td>
-                  <td className="md:w-[20%]">{enrollment.lastName}</td>
+                  <td className="md:w-[25%]">{enrollment.email}</td>
+                  <td className="md:w-[35%]">{enrollment.name}</td>
+                  <td className="md:w-[25%]">{enrollment.lastName}</td>
                 </tr>
               );
             })}

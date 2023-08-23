@@ -7,27 +7,13 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import sendMoodleRequest from "@/utils/moodle-request";
 
 async function updateEnrollmentStatusIfNecessary(
-  enrollment: Enrollment,
+  enrollment_id: string,
   enrollmentStatusType: string
 ) {
-  // if (enrollmentStatusType == null) {
-  //   await prisma.enrollmentStatus.delete({
-  //     where: {
-  //       AND: [
-  //         {
-  //           enrollment_id: enrollment.id,
-  //         },
-  //         {
-  //           enrollment_status_type: "Confirmed",
-  //         },
-  //       ],
-  //     },
-  //   });
-  // }
   if (enrollmentStatusType == "Sent") {
     await prisma.enrollment.update({
       where: {
-        id: enrollment.id,
+        id: enrollment_id,
       },
       data: {
         enrollment_status: {
@@ -40,6 +26,21 @@ async function updateEnrollmentStatusIfNecessary(
       },
     });
   }
+}
+
+async function updateEnrollmentToSent(enrollment_id: string) {
+  await prisma.enrollmentStatus.deleteMany({
+    where: {
+      AND: [
+        {
+          enrollment_id,
+        },
+        {
+          enrollment_status_type: "Confirmed",
+        },
+      ],
+    },
+  });
 }
 
 async function getCourseClass(id: string) {
@@ -157,7 +158,7 @@ export async function GET(
 
         if (index >= 0) {
           await updateEnrollmentStatusIfNecessary(
-            enrollment,
+            enrollment.id,
             enrollment.enrollment_status[0].enrollment_status_type
           );
         }
@@ -274,7 +275,7 @@ export async function PUT(
 
     if (index >= 0) {
       await updateEnrollmentStatusIfNecessary(
-        enrollment,
+        enrollment.id,
         enrollment.enrollment_status[0].enrollment_status_type
       );
 
@@ -282,33 +283,33 @@ export async function PUT(
         {
           error:
             enrollment.enrollment_status[0].enrollment_status_type == "Sent"
-              ? "Status alterado para Confirmado"
-              : "Status mantido como Confirmado",
+              ? "Inscrição alterada para Confirmada"
+              : "Inscrição mantida como Confirmada",
         },
         { status: 200 }
       );
     } else {
+      await updateEnrollmentToSent(enrollment.id);
       return NextResponse.json(
         {
           error:
             enrollment.enrollment_status[0].enrollment_status_type == "Sent"
-              ? "Aluno inscrito em outro curso. Status mantido como Inscrito"
-              : "Aluna inscrita em outro curso. Status alterado para Inscrito",
+              ? "Aluno inscrito em outro curso. Inscrição mantido como Enviada"
+              : "Aluna inscrita em outro curso. Inscrição alterado para Enviada",
         },
         { status: 200 }
       );
-      // await updateEnrollmentStatusIfNecessary(enrollment, null);
     }
   } else {
+    await updateEnrollmentToSent(enrollment.id);
     return NextResponse.json(
       {
         error:
           enrollment.enrollment_status[0].enrollment_status_type == "Sent"
-            ? "Aluno não inscrito em curso. Status mantido como Inscrito"
-            : "Aluno não inscrito em curso. Status alterado para Inscrito",
+            ? "Aluno não inscrito em curso. Inscrição mantido como Enviada"
+            : "Aluno não inscrito em curso. Inscrição alterado para Enviada",
       },
       { status: 200 }
     );
-    // await updateEnrollmentStatusIfNecessary(enrollment, null);
   }
 }
