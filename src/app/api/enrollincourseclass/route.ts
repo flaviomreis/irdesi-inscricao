@@ -49,7 +49,16 @@ export async function POST(request: NextRequest) {
     "values[0]": item.cpf,
   };
 
-  const findUserJson = await sendMoodleRequest(findUserParams);
+  const { result, json: findUserJson } = await sendMoodleRequest(
+    findUserParams
+  );
+  if (!result.ok) {
+    return NextResponse.json(
+      { error: "Ocorreu um erro ao tentar consultar o aluno no Moodle." },
+      { status: result.status }
+    );
+  }
+
   let userId = "";
   let userExists = false;
   let userEnrolled = false;
@@ -70,17 +79,14 @@ export async function POST(request: NextRequest) {
       "users[0][country]": "BR",
     };
 
-    const userJson = await sendMoodleRequest(userParams);
-
-    if (!Array.isArray(userJson)) {
-      console.log("error", userJson);
+    const { result, json: userJson } = await sendMoodleRequest(userParams);
+    if (!result.ok) {
       return NextResponse.json(
-        { error: "Ocorreu um erro ao tentar cadastrar o aluno no Moodle." },
-        { status: 500 }
+        { error: "Ocorreu um erro ao tentar criar o aluno no Moodle." },
+        { status: result.status }
       );
     }
 
-    console.log("userJson", userJson);
     userId = userJson[0].id;
   } else {
     userId = findUserJson[0].id;
@@ -93,7 +99,19 @@ export async function POST(request: NextRequest) {
       userid: userId,
     };
 
-    const findEnrollJson = await sendMoodleRequest(findEnrollParams);
+    const { result, json: findEnrollJson } = await sendMoodleRequest(
+      findEnrollParams
+    );
+
+    if (!result.ok) {
+      return NextResponse.json(
+        {
+          error:
+            "Ocorreu um erro ao tentar buscar inscrição do aluno no curso do Moodle.",
+        },
+        { status: result.status }
+      );
+    }
 
     if (Array.isArray(findEnrollJson)) {
       const index = findEnrollJson.findIndex((item) => item.id == 2);
@@ -114,7 +132,16 @@ export async function POST(request: NextRequest) {
       "enrolments[0][courseid]": 2,
     };
 
-    const enrollJson = await sendMoodleRequest(enrollParams);
+    const { result, json: enrollJson } = await sendMoodleRequest(enrollParams);
+    if (!result.ok) {
+      return NextResponse.json(
+        {
+          error:
+            "Ocorreu um erro ao tentar inscrever o aluno no curso do Moodle.",
+        },
+        { status: result.status }
+      );
+    }
 
     if (enrollJson != null) {
       console.log("error", enrollJson);

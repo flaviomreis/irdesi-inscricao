@@ -4,7 +4,7 @@ type Props = {
   items: CourseClassStudentsDAO[];
 };
 
-export default function CourseClassPosSubscribeList(props: Props) {
+export default function CourseClassOperatingReport(props: Props) {
   return (
     <div className="flex-1 mt-2">
       <table className="min-w-full text-left">
@@ -19,7 +19,10 @@ export default function CourseClassPosSubscribeList(props: Props) {
           {props.items.map((enrollment) => {
             return (
               enrollment.selected && (
-                <tr key={enrollment.id} className="flex flex-col md:flex-row">
+                <tr
+                  key={enrollment.id}
+                  className="flex flex-col md:flex-row even:bg-white odd:bg-gray-200"
+                >
                   <td className="md:w-[15%]">{enrollment.cpf}</td>
                   <td className="md:w-[25%]">{enrollment.email}</td>
                   <td className="md:w-[60%]">{enrollment.error}</td>

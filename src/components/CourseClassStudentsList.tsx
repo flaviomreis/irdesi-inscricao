@@ -1,7 +1,7 @@
 "use client";
 
 import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
-import { cache, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import DownloadButton from "./DownloadButton";
 
@@ -13,7 +13,7 @@ type Props = {
     confirmedTotal: number;
   };
   items: CourseClassStudentsDAO[];
-  showSubscribeReport: () => void;
+  showOperatingReport: () => void;
   sentChecked: boolean;
   confirmedChecked: boolean;
   activeChecked: boolean;
@@ -28,7 +28,7 @@ type Props = {
   courseClassMoodleId: string;
 };
 
-export default function CourseClassPreSubscribeList(props: Props) {
+export default function CourseClassStudentsList(props: Props) {
   const [synchronizing, setSynchronizing] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
   const router = useRouter();
@@ -42,14 +42,28 @@ export default function CourseClassPreSubscribeList(props: Props) {
 
   async function handleSyncButton() {
     setSynchronizing(true);
-    const result = await fetch(
-      `/api/enrollmentssync/${props.courseClassId}?moodle_id=${props.courseClassMoodleId}`
-    );
-    if (result.status !== 200) {
-      const json = await result.json();
-    }
-    setSynchronizing(false);
-    router.back();
+    // const result = await fetch(
+    //   `/api/enrollmentssync/${props.courseClassId}?moodle_id=${props.courseClassMoodleId}`
+    // );
+    // if (result.status !== 200) {
+    //   const json = await result.json();
+    // }
+    // router.back();
+    props.items.map(async (item) => {
+      if (item.selected) {
+        const result = await fetch(
+          `/api/enrollmentssync/${item.id}?moodle_id=${props.courseClassMoodleId}`,
+          {
+            method: "PUT",
+          }
+        ).then(async (result) => {
+          result.json().then((json) => {
+            item.error = json.error;
+            props.showOperatingReport();
+          });
+        });
+      }
+    });
   }
 
   async function handleSubscribeButton() {
@@ -68,7 +82,7 @@ export default function CourseClassPreSubscribeList(props: Props) {
         }).then(async (result) => {
           result.json().then((json) => {
             item.error = json.error;
-            props.showSubscribeReport();
+            props.showOperatingReport();
           });
         });
       }
@@ -192,8 +206,11 @@ export default function CourseClassPreSubscribeList(props: Props) {
           <tbody>
             {props.items.map((enrollment) => {
               return (
-                <tr key={enrollment.id} className="flex flex-col md:flex-row">
-                  <td className="flex items-center gap-2 md:w-[20%]">
+                <tr
+                  key={enrollment.id}
+                  className="flex flex-col md:flex-row even:bg-white odd:bg-gray-200"
+                >
+                  <td className="flex items-center gap-2 md:w-[15%]">
                     <input
                       type="checkbox"
                       id={`checkbox-${enrollment.id}`}
@@ -213,12 +230,12 @@ export default function CourseClassPreSubscribeList(props: Props) {
                       <div className="h-2 w-2 rounded-full bg-black"></div>
                     )}
                     <a href={`/admin/enrollment/${enrollment.id}`}>
-                      {enrollment.cpf}-{enrollment.error}
+                      {enrollment.cpf}
                     </a>
                   </td>
-                  <td className="md:w-[30%]">{enrollment.email}</td>
-                  <td className="md:w-[30%]">{enrollment.name}</td>
-                  <td className="md:w-[20%]">{enrollment.lastName}</td>
+                  <td className="md:w-[25%]">{enrollment.email}</td>
+                  <td className="md:w-[35%]">{enrollment.name}</td>
+                  <td className="md:w-[25%]">{enrollment.lastName}</td>
                 </tr>
               );
             })}

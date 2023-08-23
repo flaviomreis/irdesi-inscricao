@@ -2,8 +2,8 @@
 
 import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
 import { useEffect, useState } from "react";
-import CourseClassPreSubscribeList from "./CourseClassPreSubscribeList";
-import CourseClassPosSubscribeList from "./CourseClassPosSubscribeList";
+import CourseClassStudentsList from "./CourseClassStudentsList";
+import CourseClassOperatingReport from "./CourseClassOperatingReport";
 
 type Props = {
   courseClassId: string;
@@ -16,14 +16,14 @@ type Props = {
   };
 };
 
-export default function CourseClassSubscribe({
+export default function CourseClassStudents({
   courseClassId,
   courseClassMoodleId,
   dao,
   city,
   total,
 }: Props) {
-  const [subscribing, setSubscribing] = useState(false);
+  const [operating, setOperating] = useState(false);
 
   const [sentChecked, setSentChecked] = useState(false);
   const [confirmedChecked, setConfirmedChecked] = useState(false);
@@ -48,8 +48,8 @@ export default function CourseClassSubscribe({
     setItems(applyFilter());
   }, [sentChecked, confirmedChecked, activeChecked, finishedChecked, checkAll]);
 
-  function showSubscribeReport() {
-    setSubscribing(true);
+  function showOperatingReport() {
+    setOperating(true);
     setItems(items.filter((item) => item.selected));
   }
 
@@ -92,14 +92,14 @@ export default function CourseClassSubscribe({
     });
   }
 
-  return !subscribing ? (
-    <CourseClassPreSubscribeList
+  return !operating ? (
+    <CourseClassStudentsList
       courseClassId={courseClassId}
       courseClassMoodleId={courseClassMoodleId}
       city={city}
       total={total}
       items={items}
-      showSubscribeReport={showSubscribeReport}
+      showOperatingReport={showOperatingReport}
       sentChecked={sentChecked}
       confirmedChecked={confirmedChecked}
       activeChecked={activeChecked}
@@ -113,6 +113,6 @@ export default function CourseClassSubscribe({
       handleCheckAll={handleCheckAll}
     />
   ) : (
-    <CourseClassPosSubscribeList items={items} />
+    <CourseClassOperatingReport items={items} />
   );
 }
