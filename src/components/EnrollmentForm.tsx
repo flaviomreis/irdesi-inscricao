@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { EnrollmentFormSchema } from "@/schema/EnrollmentFormSchema";
 import { useState } from "react";
 import ConfirmDialog from "./ModalDialog";
+import { useRouter } from "next/navigation";
 
 type UserEnrollmentFormData = z.infer<typeof EnrollmentFormSchema>;
 
@@ -28,6 +29,7 @@ export default function EnrollmentForm(props: Props) {
 
   const [enrollmentError, setEnrollmentError] = useState<string>("");
   const [isDialogVisible, setIsDialogVisible] = useState<boolean>(false);
+  const router = useRouter();
 
   async function handleConfirmAction() {
     const result = await fetch(`/api/enrollment/`, {
@@ -45,6 +47,8 @@ export default function EnrollmentForm(props: Props) {
   }
 
   async function userEnrollment(data: UserEnrollmentFormData) {
+    console.log("aqui");
+
     const result = await fetch(props.action, {
       method: props.method,
       headers: {
@@ -56,7 +60,11 @@ export default function EnrollmentForm(props: Props) {
         studentId: props.studentId,
       }),
     });
+
     const json = await result.json();
+    if (result.status == 201) {
+      return router.push(`/preenrollment/${json.enrollment_id}`);
+    }
     setEnrollmentError(json.error);
   }
 

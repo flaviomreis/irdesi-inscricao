@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { EnrollmentWithEmployeeIdFormSchema } from "@/schema/EnrollmentFormSchema";
 import { useState } from "react";
 import ConfirmDialog from "./ModalDialog";
-import { baseUrl } from "@/utils/baseurl";
+import { useRouter } from "next/navigation";
 
 type UserEnrollmentFormData = z.infer<
   typeof EnrollmentWithEmployeeIdFormSchema
@@ -31,6 +31,7 @@ export default function EnrollmentWithEmployeeIdForm(props: Props) {
 
   const [enrollmentError, setEnrollmentError] = useState<string>("");
   const [isDialogVisible, setIsDialogVisible] = useState<boolean>(false);
+  const router = useRouter();
 
   async function handleConfirmAction() {
     const result = await fetch(`/api/enrollment/`, {
@@ -61,6 +62,9 @@ export default function EnrollmentWithEmployeeIdForm(props: Props) {
     });
 
     const json = await result.json();
+    if (result.status == 201) {
+      return router.push(`/preenrollment/${json.enrollment_id}`);
+    }
     setEnrollmentError(json.error);
   }
 

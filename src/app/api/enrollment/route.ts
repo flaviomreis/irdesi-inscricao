@@ -281,6 +281,14 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const courseClassId = body.courseClassId;
 
+  // return NextResponse.json(
+  //   {
+  //     error: `Pré-inscrição enviada com sucesso. Por favor, aguarde confirmação.`,
+  //     enrollment_id: "bf8a5903-a5ad-4824-9b62-52b4d020036f",
+  //   },
+  //   { status: 201 }
+  // );
+
   if (!courseClassId) {
     return NextResponse.json(
       { error: "`Um id de turma precisa ser enviado." },
@@ -428,7 +436,7 @@ export async function POST(request: NextRequest) {
   if (foundEnrollment) {
     return NextResponse.json(
       {
-        error: `Estudante ${studentEmail} já tem pré-inscrição nesta turma.`,
+        error: `Estudante ${studentEmail} já tem pré-inscrição nesta turma. Se a inscrição for aprovada, em breve você receberá email com suas credenciais.`,
       },
       {
         status: 401,
@@ -453,6 +461,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(
     {
       error: `Pré-inscrição enviada com sucesso. Por favor, aguarde confirmação.`,
+      enrollment_id: enrollment.id,
     },
     { status: 201 }
   );
