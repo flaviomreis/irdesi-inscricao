@@ -5,7 +5,6 @@ import {
 import CourseClassStudents from "@/components/CourseClassStudents";
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
-import { useFormatter } from "next-intl";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração de Pré-Inscrições",
@@ -31,6 +30,11 @@ async function getCourseClass(id: string) {
           {
             student: {
               name: "asc",
+            },
+          },
+          {
+            student: {
+              last_name: "asc",
             },
           },
         ],

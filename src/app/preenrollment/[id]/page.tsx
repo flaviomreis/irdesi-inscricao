@@ -6,8 +6,6 @@ export default async function PreEnrollment({
 }: {
   params: { id: string };
 }) {
-  console.log("id", params.id);
-
   const enrollment = await prisma.enrollment.findUnique({
     where: {
       id: params.id,

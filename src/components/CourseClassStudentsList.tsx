@@ -220,7 +220,7 @@ export default function CourseClassStudentsList(props: Props) {
               <th className="md:w-[25%]">email</th>
               <th className="md:w-[30%]">Nome</th>
               <th className="md:w-[20%]">Sobrenome</th>
-              <th className="md:w-[10%]">Última atualização</th>
+              <th className="md:w-[10%]">Pré-inscrição em</th>
             </tr>
           </thead>
           <tbody>
