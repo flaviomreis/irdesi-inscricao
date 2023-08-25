@@ -5,6 +5,7 @@ export type CourseClassStudentsDAO = {
   email: string;
   name: string;
   lastName: string;
+  created_at: string;
   selected: boolean;
   error: string | null;
 };

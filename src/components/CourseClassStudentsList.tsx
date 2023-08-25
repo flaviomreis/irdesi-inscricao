@@ -218,8 +218,9 @@ export default function CourseClassStudentsList(props: Props) {
                 CPF
               </th>
               <th className="md:w-[25%]">email</th>
-              <th className="md:w-[35%]">Nome</th>
-              <th className="md:w-[25%]">Sobrenome</th>
+              <th className="md:w-[30%]">Nome</th>
+              <th className="md:w-[20%]">Sobrenome</th>
+              <th className="md:w-[10%]">Última atualização</th>
             </tr>
           </thead>
           <tbody>
@@ -253,8 +254,9 @@ export default function CourseClassStudentsList(props: Props) {
                     </a>
                   </td>
                   <td className="md:w-[25%]">{enrollment.email}</td>
-                  <td className="md:w-[35%]">{enrollment.name}</td>
-                  <td className="md:w-[25%]">{enrollment.lastName}</td>
+                  <td className="md:w-[30%]">{enrollment.name}</td>
+                  <td className="md:w-[20%]">{enrollment.lastName}</td>
+                  <td className="md:w-[10%]">{enrollment.created_at}</td>
                 </tr>
               );
             })}

@@ -5,6 +5,7 @@ import {
 import CourseClassStudents from "@/components/CourseClassStudents";
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
+import { useFormatter } from "next-intl";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração de Pré-Inscrições",
@@ -47,6 +48,11 @@ export default async function AdminCourseClassPage({
   params: { id: string };
 }) {
   const courseClassId = params.id;
+  const dtFormatter = new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+
   const courseClass = await getCourseClass(courseClassId);
   const dao: CourseClassStudentsDAO[] = [];
   let sentTotal = 0;
@@ -64,6 +70,7 @@ export default async function AdminCourseClassPage({
         cpf: enrollment.student.cpf,
         name: enrollment.student.name,
         lastName: enrollment.student.last_name,
+        created_at: dtFormatter.format(enrollment.created_at),
         selected: false,
         error: null,
       });

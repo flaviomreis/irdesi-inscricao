@@ -6,9 +6,11 @@ import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
 import { prisma } from "@/db/connection";
 import sendMoodleRequest from "@/utils/moodle-request";
 
+const conn = prisma;
+
 async function setEnrollmentStatusAsConfirmed(id: string, status: string) {
   if (status == "Sent") {
-    await prisma.enrollment.update({
+    await conn.enrollment.update({
       where: {
         id,
       },
