@@ -30,17 +30,27 @@ model Institution {
 }
 
 model CourseClass {
-  id                String       @id @default(uuid())
-  course_id         String
-  course            Course       @relation(fields: [course_id], references: [id])
-  institution_id    String
-  institution       Institution  @relation(fields: [institution_id], references: [id])
-  description       String
-  enrollment        Enrollment[]
-  created_at        DateTime     @default(now())
-  requireemployeeId Boolean      @default(false)
+  id                          String                     @id @default(uuid())
+  course_id                   String
+  course                      Course                     @relation(fields: [course_id], references: [id])
+  institution_id              String
+  institution                 Institution                @relation(fields: [institution_id], references: [id])
+  description                 String
+  enrollment                  Enrollment[]
+  created_at                  DateTime                   @default(now())
+  requireemployeeId           Boolean                    @default(false)
+  course_class_administrators CourseClassAdministrator[]
 
   @@unique([course_id, institution_id, description])
+}
+
+model CourseClassAdministrator {
+  id              String      @id @default(uuid())
+  course_class_id String
+  course_class    CourseClass @relation(fields: [course_class_id], references: [id])
+  email           String
+
+  @@unique([course_class_id, email])
 }
 
 model Student {

@@ -44,7 +44,18 @@ export default async function AdminInstitutionPage({
               <a href={`/admin/courseclass/${courseClass.id}`}>
                 {courseClass.course.short_name} ({courseClass.description})
               </a>
-              <CopyToClipboardButton id={courseClass.id} />
+              <div className="flex gap-2">
+                <CopyToClipboardButton
+                  id={courseClass.id}
+                  title="URL Formulário"
+                  endpoint="enroll"
+                />
+                <CopyToClipboardButton
+                  id={courseClass.id}
+                  title="URL Relatório"
+                  endpoint="enrollmentreport"
+                />
+              </div>
             </li>
           );
         })}

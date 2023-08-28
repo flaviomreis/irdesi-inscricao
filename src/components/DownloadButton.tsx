@@ -1,6 +1,6 @@
 "use client";
 
-import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
+import { CourseClassStudentsDAO } from "@/dao/CourseClassStudentsDAO";
 import Link from "next/link";
 import { useState } from "react";
 

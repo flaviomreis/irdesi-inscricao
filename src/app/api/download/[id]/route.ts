@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import archiver from "archiver";
-import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
+import { CourseClassStudentsDAO } from "@/dao/CourseClassStudentsDAO";
 
 async function getCourseClass(id: string) {
   const result = await prisma.courseClass.findUnique({

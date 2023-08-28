@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/route";
 import isAdministrator from "@/utils/is-administrator";
-import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
+import { CourseClassStudentsDAO } from "@/dao/CourseClassStudentsDAO";
 import { prisma } from "@/db/connection";
 import sendMoodleRequest from "@/utils/moodle-request";
 

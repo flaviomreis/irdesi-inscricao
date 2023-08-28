@@ -1,10 +1,11 @@
 import {
   CourseClassStudentsDAO,
   EnrollmentStatusType,
-} from "@/app/dao/CourseClassStudentsDAO";
+} from "@/dao/CourseClassStudentsDAO";
 import CourseClassStudents from "@/components/CourseClassStudents";
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
+import dtFormatter from "@/utils/date-formatter";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração de Pré-Inscrições",
@@ -52,10 +53,6 @@ export default async function AdminCourseClassPage({
   params: { id: string };
 }) {
   const courseClassId = params.id;
-  const dtFormatter = new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  });
 
   const courseClass = await getCourseClass(courseClassId);
   const dao: CourseClassStudentsDAO[] = [];

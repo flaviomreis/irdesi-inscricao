@@ -4,7 +4,11 @@ import Image from "next/image";
 import LogoffButton from "./LogoffButton";
 import LogonButton from "./LogonButton";
 
-export default async function UserAuthBar() {
+type Props = {
+  link: boolean;
+};
+
+export default async function UserAuthBar({ link }: Props) {
   const session = await getServerSession(authOptions);
   return (
     <div className="flex justify-between items-center border-b border-gray-400">
@@ -13,7 +17,11 @@ export default async function UserAuthBar() {
       {session && (
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
-            <a href={"/admin"}>Área do Administrador(a):</a>
+            {link ? (
+              <a href={"/admin"}>Área do Administrador(a):</a>
+            ) : (
+              "Administrador(a)"
+            )}
             <span className="text-purple-800">{session.user?.name}</span>
             {session.user && session.user.image && session.user.name && (
               <Image

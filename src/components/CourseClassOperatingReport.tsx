@@ -1,4 +1,4 @@
-import { CourseClassStudentsDAO } from "@/app/dao/CourseClassStudentsDAO";
+import { CourseClassStudentsDAO } from "@/dao/CourseClassStudentsDAO";
 
 type Props = {
   items: CourseClassStudentsDAO[];

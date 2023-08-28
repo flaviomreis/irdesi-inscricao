@@ -3,6 +3,7 @@ import EnrollmentForm from "@/components/EnrollmentForm";
 import EnrollmentWithEmployeeIdForm from "@/components/EnrollmentWithEmployeeIdForm";
 import { buildUrl } from "@/utils/buildUrl";
 import { prisma } from "@/db/connection";
+import Link from "next/link";
 
 // async function getCourseClass(id: string) {
 //   const result = await fetch(buildUrl(`api/courseclasses/${id}`), {
@@ -54,9 +55,12 @@ export default async function Enroll({ params }: { params: { id: string } }) {
           <p className="text-base text-center w-full">
             Pré-Inscrição para o Curso
           </p>
-          <p className="text-violet-800 text-base text-center w-full">
+          <Link
+            href="https://irdesieducacao.com.br/ava/"
+            className="text-violet-800 text-base text-center w-full"
+          >
             {courseClass.course.name} ({courseClass.description})
-          </p>
+          </Link>
           {!courseClass.requireemployeeId ? (
             <EnrollmentForm
               courseClassId={courseClass.id}
