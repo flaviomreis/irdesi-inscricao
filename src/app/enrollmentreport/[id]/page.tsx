@@ -3,6 +3,7 @@ import UserAuthBar from "@/components/UserAuthBar";
 import EnrollmentReportList from "@/components/enrollmentreport/EnrollmentReportList";
 import { prisma } from "@/db/connection";
 import NextAuthProvider from "@/providers/auth";
+import isAdministrator from "@/utils/is-administrator";
 import { Prisma } from "@prisma/client";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth";
@@ -112,20 +113,23 @@ export default async function EnrollmentReport({
     return <div>Turma não encontrada!</div>;
   }
 
-  const courseClassAdministrators =
-    courseClass.course_class_administrators.find(
-      (item) => item.email === session.user?.email
-    );
+  if (!isAdministrator(session.user?.email)) {
+    console.log("não é administrador");
+    const courseClassAdministrators =
+      courseClass.course_class_administrators.find(
+        (item) => item.email === session.user?.email
+      );
 
-  if (!courseClassAdministrators) {
-    return (
-      <NextAuthProvider>
-        <div className="container mx-auto p-4">
-          <UserAuthBar link={false} />
-          <p>Usuário não autorizado</p>
-        </div>
-      </NextAuthProvider>
-    );
+    if (!courseClassAdministrators) {
+      return (
+        <NextAuthProvider>
+          <div className="container mx-auto p-4">
+            <UserAuthBar link={false} />
+            <p>Usuário não autorizado</p>
+          </div>
+        </NextAuthProvider>
+      );
+    }
   }
 
   let reportItems: EnrollmentReportItem[] = [];
