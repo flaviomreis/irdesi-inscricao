@@ -2,72 +2,164 @@
 
 import { EnrollmentReportItem } from "@/app/enrollmentreport/[id]/page";
 import dtFormatter from "@/utils/date-formatter";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, ArrowUp, Dot, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Props = {
   items: EnrollmentReportItem[];
+  courseClassId: string;
 };
-
-// function cpfSort(a: EnrollmentReportItem, b: EnrollmentReportItem) {
-//   return a.cpf.localeCompare(b.cpf);
-// }
-
-// function emailSort(a: EnrollmentReportItem, b: EnrollmentReportItem) {
-//   return a.email.localeCompare(b.email);
-// }
 
 function stringSort(
   a: EnrollmentReportItem,
   b: EnrollmentReportItem,
-  field: keyof EnrollmentReportItem
+  field: keyof EnrollmentReportItem,
+  ascSorting: boolean
 ) {
-  return (a[field] as string).localeCompare(b[field] as string);
+  if (ascSorting) {
+    return (a[field] as string).localeCompare(b[field] as string);
+  } else {
+    return (b[field] as string).localeCompare(a[field] as string);
+  }
 }
 
 function dateSort(
   a: EnrollmentReportItem,
   b: EnrollmentReportItem,
-  field: keyof EnrollmentReportItem
+  field: keyof EnrollmentReportItem,
+  ascSorting: boolean
 ) {
-  return Number(a[field] as Date) - Number(b[field] as Date);
+  if (ascSorting) {
+    return Number(a[field] as Date) - Number(b[field] as Date);
+  } else {
+    return Number(b[field] as Date) - Number(a[field] as Date);
+  }
 }
 
-export default function EnrollmentReportList({ items }: Props) {
-  const [order, setOrder] = useState("cpf");
+function numberSort(
+  a: EnrollmentReportItem,
+  b: EnrollmentReportItem,
+  field: keyof EnrollmentReportItem,
+  ascSorting: boolean
+) {
+  if (ascSorting) {
+    return Number(a[field]) - Number(b[field]);
+  } else {
+    return Number(b[field]) - Number(a[field]);
+  }
+}
+
+export default function EnrollmentReportList({ items, courseClassId }: Props) {
+  const [order, setOrder] = useState("name");
   const [orderedList, setOrderedList] = useState(items);
+  const [ascSorting, setAscSorting] = useState(true);
+  const zeroDate = new Date(0);
 
   useEffect(() => {
-    const copy = [...items];
-    console.log(order);
+    const copy = [...orderedList];
     if (order === "cpf") {
-      copy.sort((a, b) => stringSort(a, b, "cpf"));
+      copy.sort((a, b) => stringSort(a, b, "cpf", ascSorting));
     }
     if (order === "email") {
-      copy.sort((a, b) => stringSort(a, b, "email"));
+      copy.sort((a, b) => stringSort(a, b, "email", ascSorting));
     }
     if (order === "name") {
-      copy.sort((a, b) => stringSort(a, b, "name"));
+      copy.sort((a, b) => stringSort(a, b, "name", ascSorting));
     }
     if (order === "lastName") {
-      copy.sort((a, b) => stringSort(a, b, "lastName"));
+      copy.sort((a, b) => stringSort(a, b, "lastName", ascSorting));
+    }
+    if (order === "status") {
+      copy.sort((a, b) => stringSort(a, b, "lastStatus", ascSorting));
     }
     if (order === "preenrollmentDate") {
-      copy.sort((a, b) => dateSort(a, b, "preenrollmentDate"));
+      copy.sort((a, b) => dateSort(a, b, "preenrollmentDate", ascSorting));
     }
     if (order === "confirmationDate") {
-      copy.sort((a, b) => dateSort(a, b, "confirmationDate"));
+      copy.sort((a, b) => dateSort(a, b, "confirmationDate", ascSorting));
     }
-
+    if (order === "lastAccessDate") {
+      copy.sort((a, b) => dateSort(a, b, "lastAccessDate", ascSorting));
+    }
+    if (order === "progress") {
+      copy.sort((a, b) => numberSort(a, b, "progress", ascSorting));
+    }
     setOrderedList(copy);
-  }, [order]);
+  }, [order, ascSorting]);
 
   function handleColumnClick(field: string) {
     setOrder(field);
+    setAscSorting((previous) => !previous);
+  }
+
+  async function handleRefreshClick(cpf: string) {
+    console.log(`/api/enrollmentlastaccess/${cpf}?course_id=${courseClassId}`);
+
+    const result = await fetch(
+      `/api/enrollmentlastaccess/${cpf}?course_id=${courseClassId}`
+    );
+    if (result.status == 200) {
+      const json = await result.json();
+      const lastAccessDate =
+        json.courseLastAccess == null
+          ? zeroDate
+          : new Date(Number(json.courseLastAccess) * 1000);
+      const progress =
+        json.courseLastAccess == null ? null : json.courseProgress;
+      const newList = orderedList.map((item) => {
+        if (item.cpf == cpf) {
+          return {
+            ...item,
+            lastAccessDate,
+            progress,
+          };
+        } else {
+          return item;
+        }
+      });
+      setOrderedList(newList);
+    } else {
+      console.log(result.status);
+    }
+  }
+
+  function statusInPtBr(status: string) {
+    return status == "Sent"
+      ? "Enviada"
+      : status == "Confirmed"
+      ? "Confirmada"
+      : status == "Active"
+      ? "Ativa"
+      : "Concluída";
+  }
+
+  function formatDate(date: Date | null) {
+    if (date == null) {
+      return (
+        <span className="text-blue-700 text-xs">Ainda não atualizado</span>
+      );
+    } else if (date.valueOf() == zeroDate.valueOf()) {
+      return (
+        <span className="text-gray-700 text-xs">Ainda não acessou o curso</span>
+      );
+    }
+    return dtFormatter.format(date);
+  }
+
+  function arrowIcon(column: string) {
+    if (column == order) {
+      return ascSorting ? (
+        <ArrowDown className="inline w-3" />
+      ) : (
+        <ArrowUp className="inline w-3" />
+      );
+    } else {
+      return <Dot className="inline w-3 opacity-0" />;
+    }
   }
 
   return (
-    <div className="p-4">
+    <div className="py-2 px-4 flex flex-col items-center">
       <table className="text-left table-auto w-full">
         <thead className="border-b border-gray-400">
           <tr>
@@ -75,57 +167,61 @@ export default function EnrollmentReportList({ items }: Props) {
               onClick={() => handleColumnClick("cpf")}
               className="block md:table-cell"
             >
-              CPF {order == "cpf" && <ArrowDown size={12} className="inline" />}
+              CPF {arrowIcon("cpf")}
             </th>
             <th
               onClick={() => handleColumnClick("email")}
               className="block md:table-cell"
             >
-              email{" "}
-              {order == "email" && <ArrowDown size={12} className="inline" />}
+              email {arrowIcon("email")}
             </th>
             <th
               onClick={() => handleColumnClick("employeeId")}
               className="block md:table-cell"
             >
-              Matrícula{" "}
-              {order == "employeeId" && (
-                <ArrowDown size={12} className="inline" />
-              )}
+              Matrícula {arrowIcon("employeeId")}
             </th>
             <th
               onClick={() => handleColumnClick("name")}
               className="block md:table-cell"
             >
-              Nome{" "}
-              {order == "name" && <ArrowDown size={12} className="inline" />}
+              Nome {arrowIcon("name")}
             </th>
             <th
               onClick={() => handleColumnClick("lastName")}
               className="block md:table-cell"
             >
-              Sobrenome{" "}
-              {order == "lastName" && (
-                <ArrowDown size={12} className="inline" />
-              )}
+              Sobrenome {arrowIcon("lastName")}
+            </th>
+            <th
+              onClick={() => handleColumnClick("status")}
+              className="block md:table-cell"
+            >
+              Situação {arrowIcon("status")}
             </th>
             <th
               onClick={() => handleColumnClick("preenrollmentDate")}
               className="block md:table-cell"
             >
-              Pré-inscrito em{" "}
-              {order == "preenrollmentDate" && (
-                <ArrowDown size={12} className="inline" />
-              )}
+              Pré-inscrito em {arrowIcon("preenrollmentDate")}
             </th>
             <th
               onClick={() => handleColumnClick("confirmationDate")}
               className="block md:table-cell"
             >
-              Matriculado em{" "}
-              {order == "confirmationDate" && (
-                <ArrowDown size={12} className="inline" />
-              )}
+              Matriculado em {arrowIcon("confirmationDate")}
+            </th>
+            <th
+              onClick={() => handleColumnClick("lastAccessDate")}
+              className="block md:table-cell"
+            >
+              Último acesso em {arrowIcon("lastAccessDate")}
+            </th>
+            <th
+              onClick={() => handleColumnClick("progress")}
+              className="block md:table-cell"
+            >
+              Progresso {arrowIcon("progress")}
             </th>
           </tr>
         </thead>
@@ -139,10 +235,23 @@ export default function EnrollmentReportList({ items }: Props) {
                 <td className="block md:table-cell">{item.name}</td>
                 <td className="block md:table-cell">{item.lastName}</td>
                 <td className="block md:table-cell">
+                  {statusInPtBr(item.lastStatus)}
+                </td>
+                <td className="block md:table-cell">
                   {dtFormatter.format(item.preenrollmentDate)}
                 </td>
                 <td className="block md:table-cell">
                   {dtFormatter.format(item.confirmationDate)}
+                </td>
+                <td className="block md:table-cell">
+                  <RefreshCw
+                    className="inline w-4"
+                    onClick={() => handleRefreshClick(item.cpf)}
+                  />{" "}
+                  {formatDate(item.lastAccessDate)}
+                </td>
+                <td className="block md:table-cell text-right">
+                  {item.progress && `${item.progress.toFixed(2)} %`}
                 </td>
               </tr>
             );

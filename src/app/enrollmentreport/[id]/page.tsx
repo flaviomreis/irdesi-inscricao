@@ -18,9 +18,12 @@ export type EnrollmentReportItem = {
   email: string;
   name: string;
   lastName: string;
+  lastStatus: string;
   employeeId: string | null;
   preenrollmentDate: Date;
   confirmationDate: Date;
+  lastAccessDate: Date | null;
+  progress: Number | null;
 };
 
 type CourseClassPayload = {
@@ -83,8 +86,11 @@ function fillReportItems(courseClass: CourseClassData) {
         employeeId: item.student.employeeId,
         name: item.student.name,
         lastName: item.student.last_name,
+        lastStatus: item.enrollment_status[0].enrollment_status_type,
         preenrollmentDate: item.created_at,
         confirmationDate: item.enrollment_status[0].created_at,
+        lastAccessDate: null,
+        progress: null,
       })
     );
   }
@@ -114,7 +120,6 @@ export default async function EnrollmentReport({
   }
 
   if (!isAdministrator(session.user?.email)) {
-    console.log("não é administrador");
     const courseClassAdministrators =
       courseClass.course_class_administrators.find(
         (item) => item.email === session.user?.email
@@ -140,7 +145,7 @@ export default async function EnrollmentReport({
   return (
     <NextAuthProvider>
       <UserAuthBar link={false} />
-      <div className="flex flex-col gap-2 justify-items-center items-center text-center p-4">
+      <div className="flex flex-col gap-2 justify-items-center items-center text-center p-2">
         <Image
           src="/logo-v2.png"
           alt="Logo Campi-Irdesi"
@@ -159,7 +164,10 @@ export default async function EnrollmentReport({
           Relação de Alunos Matriculados ({reportItems.length}&nbsp;inscrições)
         </p>
       </div>
-      <EnrollmentReportList items={reportItems} />{" "}
+      <EnrollmentReportList
+        items={reportItems}
+        courseClassId={courseClass.id}
+      />
     </NextAuthProvider>
   );
 }

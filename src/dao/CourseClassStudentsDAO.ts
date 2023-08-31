@@ -10,4 +10,8 @@ export type CourseClassStudentsDAO = {
   error: string | null;
 };
 
-export type EnrollmentStatusType = "Sent" | "Confirmed" | "Active" | "Finished";
+export type EnrollmentStatusType =
+  | "Sent"
+  | "Confirmed"
+  | "Active"
+  | "Completed";

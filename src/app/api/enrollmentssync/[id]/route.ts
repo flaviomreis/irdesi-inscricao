@@ -7,9 +7,23 @@ import sendMoodleRequest from "@/utils/moodle-request";
 
 async function updateEnrollmentStatusIfNecessary(
   enrollment_id: string,
-  enrollmentStatusType: string
+  enrollmentStatusType: string,
+  courseLastAccess: number | null,
+  courseCompleted: boolean
 ) {
-  if (enrollmentStatusType == "Sent") {
+  let newStatus = "";
+
+  if (courseCompleted) {
+    newStatus = "Completed";
+  } else {
+    if (courseLastAccess !== null) {
+      newStatus = "Active";
+    } else {
+      newStatus = "Confirmed";
+    }
+  }
+
+  if (enrollmentStatusType != newStatus) {
     await prisma.enrollment.update({
       where: {
         id: enrollment_id,
@@ -18,10 +32,29 @@ async function updateEnrollmentStatusIfNecessary(
         enrollment_status: {
           create: [
             {
-              enrollment_status_type: "Confirmed",
+              enrollment_status_type: newStatus,
             },
           ],
         },
+      },
+    });
+  }
+
+  return newStatus;
+}
+
+async function updateUserEmailIfNecessary(
+  studentId: string,
+  studentEmail: string,
+  moodleEmail: string
+) {
+  if (studentEmail !== moodleEmail) {
+    await prisma.student.update({
+      where: {
+        id: studentId,
+      },
+      data: {
+        email: moodleEmail,
       },
     });
   }
@@ -35,7 +68,9 @@ async function updateEnrollmentToSent(enrollment_id: string) {
           enrollment_id,
         },
         {
-          enrollment_status_type: "Confirmed",
+          enrollment_status_type: {
+            not: "Sent",
+          },
         },
       ],
     },
@@ -90,85 +125,6 @@ async function getEnrollment(id: string) {
   });
 
   return result;
-}
-
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const session = await getServerSession(authOptions);
-
-  if (
-    !session ||
-    !session.user ||
-    !(await isAdministrator(session.user.email))
-  ) {
-    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-  }
-
-  const id = params.id;
-  const moodle_id = request.nextUrl.searchParams.get("moodle_id") as string;
-  if (!moodle_id) {
-    return NextResponse.json(
-      { error: `O id do curso no Moodle não foi enviado.` },
-      { status: 401 }
-    );
-  }
-
-  const courseClass = await getCourseClass(id);
-
-  if (!courseClass) {
-    return NextResponse.json(
-      { error: `A turma ${id} não existe.` },
-      { status: 401 }
-    );
-  }
-
-  const enrollments = courseClass.enrollment;
-  for (let i = 0; i < enrollments.length; i++) {
-    const enrollment = enrollments[i];
-    // Consulta se estudante já existe com o CPF como username
-    const findUserParams = {
-      wstoken: process.env.MOODLE_GET_TOKEN!,
-      wsfunction: "core_user_get_users_by_field",
-      moodlewsrestformat: "json",
-      field: "username",
-      "values[0]": enrollment.student.cpf,
-    };
-
-    const findUserJson = await sendMoodleRequest(findUserParams);
-
-    if (Array.isArray(findUserJson) && findUserJson.length == 1) {
-      const userId = findUserJson[0].id;
-
-      const findCoursesParams = {
-        wstoken: process.env.MOODLE_GET_TOKEN!,
-        wsfunction: "core_enrol_get_users_courses",
-        moodlewsrestformat: "json",
-        userid: userId,
-      };
-
-      const findCoursesJson = await sendMoodleRequest(findCoursesParams);
-
-      if (Array.isArray(findCoursesJson) && findCoursesJson.length > 0) {
-        const index = findCoursesJson.findIndex(
-          (course) => course.id == moodle_id
-        );
-
-        if (index >= 0) {
-          await updateEnrollmentStatusIfNecessary(
-            enrollment.id,
-            enrollment.enrollment_status[0].enrollment_status_type
-          );
-        }
-      }
-    }
-  }
-
-  return NextResponse.json(
-    { error: "Sincronização concluída." },
-    { status: 200 }
-  );
 }
 
 export async function PUT(
@@ -232,7 +188,7 @@ export async function PUT(
   }
 
   if (findUserJson.length == 0) {
-    //await updateEnrollmentToSent(enrollment.id);
+    await updateEnrollmentToSent(enrollment.id);
     return NextResponse.json(
       {
         error:
@@ -253,6 +209,12 @@ export async function PUT(
   }
 
   const userId = findUserJson[0].id;
+  const userEmail = findUserJson[0].email;
+  updateUserEmailIfNecessary(
+    enrollment.student_id,
+    enrollment.student.email,
+    userEmail
+  );
 
   const findCoursesParams = {
     wstoken: process.env.MOODLE_GET_TOKEN!,
@@ -284,17 +246,31 @@ export async function PUT(
     const index = findCoursesJson.findIndex((course) => course.id == moodle_id);
 
     if (index >= 0) {
-      await updateEnrollmentStatusIfNecessary(
+      const courseLastAccess = findCoursesJson[index].lastaccess;
+      const courseCompleted = findCoursesJson[index].completed;
+
+      const newStatus = await updateEnrollmentStatusIfNecessary(
         enrollment.id,
-        enrollment.enrollment_status[0].enrollment_status_type
+        enrollment.enrollment_status[0].enrollment_status_type,
+        courseLastAccess,
+        courseCompleted
       );
+
+      const newStatusPtBR =
+        newStatus == "Sent"
+          ? "Enviada"
+          : newStatus == "Confirmed"
+          ? "Confirmada"
+          : newStatus == "Active"
+          ? "Ativa"
+          : "Concluída";
 
       return NextResponse.json(
         {
           error:
-            enrollment.enrollment_status[0].enrollment_status_type == "Sent"
-              ? "Inscrição alterada para Confirmada"
-              : "Inscrição mantida como Confirmada",
+            enrollment.enrollment_status[0].enrollment_status_type !== newStatus
+              ? `Inscrição alterada para ${newStatusPtBR}`
+              : `Inscrição mantida como ${newStatusPtBR}`,
         },
         { status: 200 }
       );
@@ -323,3 +299,82 @@ export async function PUT(
     );
   }
 }
+
+// export async function GET(
+//   request: NextRequest,
+//   { params }: { params: { id: string } }
+// ) {
+//   const session = await getServerSession(authOptions);
+
+//   if (
+//     !session ||
+//     !session.user ||
+//     !(await isAdministrator(session.user.email))
+//   ) {
+//     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+//   }
+
+//   const id = params.id;
+//   const moodle_id = request.nextUrl.searchParams.get("moodle_id") as string;
+//   if (!moodle_id) {
+//     return NextResponse.json(
+//       { error: `O id do curso no Moodle não foi enviado.` },
+//       { status: 401 }
+//     );
+//   }
+
+//   const courseClass = await getCourseClass(id);
+
+//   if (!courseClass) {
+//     return NextResponse.json(
+//       { error: `A turma ${id} não existe.` },
+//       { status: 401 }
+//     );
+//   }
+
+//   const enrollments = courseClass.enrollment;
+//   for (let i = 0; i < enrollments.length; i++) {
+//     const enrollment = enrollments[i];
+//     // Consulta se estudante já existe com o CPF como username
+//     const findUserParams = {
+//       wstoken: process.env.MOODLE_GET_TOKEN!,
+//       wsfunction: "core_user_get_users_by_field",
+//       moodlewsrestformat: "json",
+//       field: "username",
+//       "values[0]": enrollment.student.cpf,
+//     };
+
+//     const findUserJson = await sendMoodleRequest(findUserParams);
+
+//     if (Array.isArray(findUserJson) && findUserJson.length == 1) {
+//       const userId = findUserJson[0].id;
+
+//       const findCoursesParams = {
+//         wstoken: process.env.MOODLE_GET_TOKEN!,
+//         wsfunction: "core_enrol_get_users_courses",
+//         moodlewsrestformat: "json",
+//         userid: userId,
+//       };
+
+//       const findCoursesJson = await sendMoodleRequest(findCoursesParams);
+
+//       if (Array.isArray(findCoursesJson) && findCoursesJson.length > 0) {
+//         const index = findCoursesJson.findIndex(
+//           (course) => course.id == moodle_id
+//         );
+
+//         if (index >= 0) {
+//           await updateEnrollmentStatusIfNecessary(
+//             enrollment.id,
+//             enrollment.enrollment_status[0].enrollment_status_type
+//           );
+//         }
+//       }
+//     }
+//   }
+
+//   return NextResponse.json(
+//     { error: "Sincronização concluída." },
+//     { status: 200 }
+//   );
+// }

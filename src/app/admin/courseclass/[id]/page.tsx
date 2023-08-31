@@ -58,6 +58,8 @@ export default async function AdminCourseClassPage({
   const dao: CourseClassStudentsDAO[] = [];
   let sentTotal = 0;
   let confirmedTotal = 0;
+  let activeTotal = 0;
+  let completedTotal = 0;
 
   if (courseClass) {
     courseClass.enrollment.map((enrollment) => {
@@ -77,6 +79,8 @@ export default async function AdminCourseClassPage({
       });
       status == "Sent" && sentTotal++;
       status == "Confirmed" && confirmedTotal++;
+      status == "Active" && activeTotal++;
+      status == "Completed" && completedTotal++;
     });
   }
 
@@ -93,7 +97,7 @@ export default async function AdminCourseClassPage({
           courseClassMoodleId={courseClass.course.moodle_id}
           dao={dao}
           city={courseClass?.institution.short_name!}
-          total={{ sentTotal, confirmedTotal }}
+          total={{ sentTotal, confirmedTotal, activeTotal, completedTotal }}
         />
       </div>
     )

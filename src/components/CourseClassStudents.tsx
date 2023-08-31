@@ -13,6 +13,8 @@ type Props = {
   total: {
     sentTotal: number;
     confirmedTotal: number;
+    activeTotal: number;
+    completedTotal: number;
   };
 };
 
@@ -28,7 +30,7 @@ export default function CourseClassStudents({
   const [sentChecked, setSentChecked] = useState(false);
   const [confirmedChecked, setConfirmedChecked] = useState(false);
   const [activeChecked, setActiveChecked] = useState(false);
-  const [finishedChecked, setFinishedChecked] = useState(false);
+  const [completedChecked, setCompletedChecked] = useState(false);
   const [items, setItems] = useState<CourseClassStudentsDAO[]>(applyFilter());
   const [checkAll, setCheckAll] = useState(false);
 
@@ -40,13 +42,25 @@ export default function CourseClassStudents({
       if (item.status == "Confirmed" && confirmedChecked) {
         return true;
       }
+      if (item.status == "Active" && activeChecked) {
+        return true;
+      }
+      if (item.status == "Completed" && completedChecked) {
+        return true;
+      }
     });
     return filter;
   }
 
   useEffect(() => {
     setItems(applyFilter());
-  }, [sentChecked, confirmedChecked, activeChecked, finishedChecked, checkAll]);
+  }, [
+    sentChecked,
+    confirmedChecked,
+    activeChecked,
+    completedChecked,
+    checkAll,
+  ]);
 
   function showOperatingReport() {
     setOperating(true);
@@ -68,9 +82,9 @@ export default function CourseClassStudents({
     return !activeChecked;
   }
 
-  function toogleFinishedChecked(): boolean {
-    setFinishedChecked(!finishedChecked);
-    return !finishedChecked;
+  function toogleCompletedChecked(): boolean {
+    setCompletedChecked(!completedChecked);
+    return !completedChecked;
   }
 
   function handleOnSelectChange(id: string) {
@@ -103,12 +117,12 @@ export default function CourseClassStudents({
       sentChecked={sentChecked}
       confirmedChecked={confirmedChecked}
       activeChecked={activeChecked}
-      finishedChecked={finishedChecked}
+      completedChecked={completedChecked}
       checkAll={checkAll}
       toogleSentChecked={toogleSentChecked}
       toogleConfirmedChecked={toogleConfirmedChecked}
       toogleActiveChecked={toogleActiveChecked}
-      toogleFinishedChecked={toogleFinishedChecked}
+      toogleCompletedChecked={toogleCompletedChecked}
       handleOnSelectChange={handleOnSelectChange}
       handleCheckAll={handleCheckAll}
     />

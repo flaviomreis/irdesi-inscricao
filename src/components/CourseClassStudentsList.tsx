@@ -11,18 +11,20 @@ type Props = {
   total: {
     sentTotal: number;
     confirmedTotal: number;
+    activeTotal: number;
+    completedTotal: number;
   };
   items: CourseClassStudentsDAO[];
   showOperatingReport: () => void;
   sentChecked: boolean;
   confirmedChecked: boolean;
   activeChecked: boolean;
-  finishedChecked: boolean;
+  completedChecked: boolean;
   checkAll: boolean;
   toogleSentChecked: () => boolean;
   toogleConfirmedChecked: () => boolean;
   toogleActiveChecked: () => boolean;
-  toogleFinishedChecked: () => boolean;
+  toogleCompletedChecked: () => boolean;
   handleOnSelectChange: (id: string) => void;
   handleCheckAll: () => void;
   courseClassMoodleId: string;
@@ -37,7 +39,7 @@ export default function CourseClassStudentsList(props: Props) {
     e.name == "sentCheck" && props.toogleSentChecked();
     e.name == "confirmedCheck" && props.toogleConfirmedChecked();
     e.name == "activeCheck" && props.toogleActiveChecked();
-    e.name == "finishedCheck" && props.toogleFinishedChecked();
+    e.name == "completedCheck" && props.toogleCompletedChecked();
   }
 
   async function handleSyncButton() {
@@ -170,17 +172,17 @@ export default function CourseClassStudentsList(props: Props) {
             name="activeCheck"
             onChange={(e) => handleChecks(e.target)}
           />
-          Ativa (0)
+          Ativa ({props.total.activeTotal})
         </label>
         <label>
           <input
             type="checkbox"
             className="w-4 h-4 m-1 rounded-full text-black focus:ring-black accent-black border border-black"
-            checked={props.finishedChecked}
-            name="finishedCheck"
+            checked={props.completedChecked}
+            name="completedCheck"
             onChange={(e) => handleChecks(e.target)}
           />
-          Concluída (0)
+          Concluída ({props.total.completedTotal})
         </label>
         <div className="flex md:flex-1 w-full justify-between items-center">
           <button
@@ -246,7 +248,7 @@ export default function CourseClassStudentsList(props: Props) {
                     {enrollment.status == "Active" && (
                       <div className="h-2 w-2 rounded-full bg-green-500"></div>
                     )}
-                    {enrollment.status == "Finished" && (
+                    {enrollment.status == "Completed" && (
                       <div className="h-2 w-2 rounded-full bg-black"></div>
                     )}
                     <a href={`/admin/enrollment/${enrollment.id}`}>
