@@ -58,6 +58,17 @@ async function getCourseClass(id: string) {
       course_class_administrators: true,
       course: true,
       institution: true,
+      enrollment: {
+        include: {
+          student: true,
+          enrollment_status: {
+            take: 1,
+            orderBy: {
+              created_at: "desc",
+            },
+          },
+        },
+      },
     },
   });
 }
@@ -108,6 +119,24 @@ export async function GET(
 
   if (!isAdmin && !isCourseAdministrator) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  }
+
+  const courseLimitOfStudents = courseClass.amountOfStudents;
+  let courseAmountOfEnrollments = 0;
+  courseClass.enrollment.map((item) => {
+    const amount =
+      item.enrollment_status[0].enrollment_status_type !== "Sent" ? 1 : 0;
+    courseAmountOfEnrollments += amount;
+  });
+
+  if (courseLimitOfStudents <= courseAmountOfEnrollments) {
+    return NextResponse.json(
+      {
+        error:
+          "Alcançado limite de alunos para a turma. Não foi possível matricular.",
+      },
+      { status: 400 }
+    );
   }
 
   const student = await getStudent(student_id);
