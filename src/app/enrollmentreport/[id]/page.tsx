@@ -1,9 +1,11 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import UserAuthBar from "@/components/UserAuthBar";
 import EnrollmentReportList from "@/components/enrollmentreport/EnrollmentReportList";
+import PreEnrollmentReportList from "@/components/enrollmentreport/PreEnrollmentReportList";
 import { prisma } from "@/db/connection";
 import NextAuthProvider from "@/providers/auth";
 import isAdministrator from "@/utils/is-administrator";
+import plural from "@/utils/plural";
 import { Prisma } from "@prisma/client";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth";
@@ -14,6 +16,7 @@ export const metadata: Metadata = {
 };
 
 export type EnrollmentReportItem = {
+  student_id: string;
   cpf: string;
   email: string;
   name: string;
@@ -21,7 +24,7 @@ export type EnrollmentReportItem = {
   lastStatus: string;
   employeeId: string | null;
   preenrollmentDate: Date;
-  confirmationDate: Date;
+  confirmationDate: Date | null;
   lastAccessDate: Date | null;
   progress: Number | null;
 };
@@ -74,13 +77,12 @@ type CourseClassData = Prisma.CourseClassGetPayload<CourseClassPayload>;
 
 function fillReportItems(courseClass: CourseClassData) {
   const reportItems: EnrollmentReportItem[] = [];
+  const preEnrollmentItems: EnrollmentReportItem[] = [];
 
   if (courseClass) {
-    const filteredResult = courseClass.enrollment.filter(
-      (item) => item.enrollment_status[0].enrollment_status_type != "Sent"
-    );
-    filteredResult.map((item) =>
-      reportItems.push({
+    courseClass.enrollment.map((item) => {
+      const obj: EnrollmentReportItem = {
+        student_id: item.student_id,
         cpf: item.student.cpf,
         email: item.student.email,
         employeeId: item.student.employeeId,
@@ -91,10 +93,16 @@ function fillReportItems(courseClass: CourseClassData) {
         confirmationDate: item.enrollment_status[0].created_at,
         lastAccessDate: null,
         progress: null,
-      })
-    );
+      };
+
+      if (item.enrollment_status[0].enrollment_status_type !== "Sent") {
+        reportItems.push(obj);
+      } else {
+        preEnrollmentItems.push({ ...obj, confirmationDate: null });
+      }
+    });
   }
-  return reportItems;
+  return [reportItems, preEnrollmentItems];
 }
 
 export default async function EnrollmentReport({
@@ -138,8 +146,9 @@ export default async function EnrollmentReport({
   }
 
   let reportItems: EnrollmentReportItem[] = [];
+  let preEnrollmentItems: EnrollmentReportItem[] = [];
   if (courseClass) {
-    reportItems = fillReportItems(courseClass);
+    [reportItems, preEnrollmentItems] = fillReportItems(courseClass);
   }
 
   return (
@@ -158,10 +167,26 @@ export default async function EnrollmentReport({
           Contrato: {courseClass.institution.short_name}
         </p>
         <p className="text-violet-800 text-lg">
-          Turma: {courseClass.course.name} ({courseClass.description})
+          Turma: {courseClass.course.name} ({courseClass.description})<br />
+          {courseClass.amountOfStudents} vagas
         </p>
-        <p className="text-gray-700 text-lg">
-          Relação de Alunos Matriculados ({reportItems.length}&nbsp;inscrições)
+      </div>
+
+      <div className="flex flex-col gap-2 justify-items-center items-center text-center p-2">
+        <p className="text-yellow-600 text-lg">
+          Relação de Alunos Não Matriculados (
+          {plural("inscrição", preEnrollmentItems.length)})
+        </p>
+      </div>
+      <PreEnrollmentReportList
+        items={preEnrollmentItems}
+        courseClassId={courseClass.id}
+      />
+
+      <div className="flex flex-col gap-2 justify-items-center items-center text-center p-2 mt-4">
+        <p className="text-blue-600 text-lg">
+          Relação de Alunos Matriculados (
+          {plural("inscrição", reportItems.length)})
         </p>
       </div>
       <EnrollmentReportList

@@ -62,7 +62,7 @@ export default function EnrollmentForm(props: Props) {
     });
 
     const json = await result.json();
-    if (result.status == 201) {
+    if (result.status === 201) {
       return router.push(`/preenrollment/${json.enrollment_id}`);
     }
     setEnrollmentError(json.error);

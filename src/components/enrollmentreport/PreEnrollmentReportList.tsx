@@ -2,7 +2,14 @@
 
 import { EnrollmentReportItem } from "@/app/enrollmentreport/[id]/page";
 import dtFormatter from "@/utils/date-formatter";
-import { ArrowDown, ArrowUp, Dot, RefreshCw } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Dot,
+  RefreshCw,
+  UserCheck,
+  UserPlus,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -49,11 +56,14 @@ function numberSort(
   }
 }
 
-export default function EnrollmentReportList({ items, courseClassId }: Props) {
+export default function PreEnrollmentReportList({
+  items,
+  courseClassId,
+}: Props) {
   const [order, setOrder] = useState("name");
   const [orderedList, setOrderedList] = useState(items);
-  const [errorMessage, setErrorMessage] = useState("");
   const [ascSorting, setAscSorting] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const zeroDate = new Date(0);
 
   useEffect(() => {
@@ -76,76 +86,12 @@ export default function EnrollmentReportList({ items, courseClassId }: Props) {
     if (order === "preenrollmentDate") {
       copy.sort((a, b) => dateSort(a, b, "preenrollmentDate", ascSorting));
     }
-    if (order === "confirmationDate") {
-      copy.sort((a, b) => dateSort(a, b, "confirmationDate", ascSorting));
-    }
-    if (order === "lastAccessDate") {
-      copy.sort((a, b) => dateSort(a, b, "lastAccessDate", ascSorting));
-    }
-    if (order === "progress") {
-      copy.sort((a, b) => numberSort(a, b, "progress", ascSorting));
-    }
     setOrderedList(copy);
   }, [order, ascSorting]);
 
   function handleColumnClick(field: string) {
     setOrder(field);
     setAscSorting((previous) => !previous);
-  }
-
-  async function handleRefreshClick(cpf: string) {
-    setErrorMessage("");
-    const result = await fetch(
-      `/api/enrollmentlastaccess/${cpf}?course_id=${courseClassId}`
-    );
-
-    const json = await result.json();
-
-    if (result.status === 200) {
-      const lastAccessDate =
-        json.courseLastAccess === null
-          ? zeroDate
-          : new Date(Number(json.courseLastAccess) * 1000);
-      const progress =
-        json.courseLastAccess === null ? null : json.courseProgress;
-      const newList = orderedList.map((item) => {
-        if (item.cpf === cpf) {
-          return {
-            ...item,
-            lastAccessDate,
-            progress,
-          };
-        } else {
-          return item;
-        }
-      });
-      setOrderedList(newList);
-    } else {
-      setErrorMessage(json.error);
-    }
-  }
-
-  function statusInPtBr(status: string) {
-    return status === "Sent"
-      ? "Enviada"
-      : status === "Confirmed"
-      ? "Confirmada"
-      : status === "Active"
-      ? "Ativa"
-      : "Concluída";
-  }
-
-  function formatDate(date: Date | null) {
-    if (date === null) {
-      return (
-        <span className="text-blue-700 text-xs">Ainda não atualizado</span>
-      );
-    } else if (date.valueOf() === zeroDate.valueOf()) {
-      return (
-        <span className="text-gray-700 text-xs">Ainda não acessou o curso</span>
-      );
-    }
-    return dtFormatter.format(date);
   }
 
   function arrowIcon(column: string) {
@@ -157,6 +103,32 @@ export default function EnrollmentReportList({ items, courseClassId }: Props) {
       );
     } else {
       return <Dot className="inline w-3 opacity-0" />;
+    }
+  }
+
+  async function handleEnrollClick(student_id: string) {
+    const result = await fetch(
+      `/api/enrollastudent/${student_id}?course_id=${courseClassId}`
+    );
+
+    const json = await result.json();
+
+    if (result.status === 200) {
+      const newList = orderedList.map((item) => {
+        if (item.student_id === student_id) {
+          const confirmationDate = new Date();
+          return {
+            ...item,
+            confirmationDate,
+          };
+        } else {
+          return item;
+        }
+      });
+
+      setOrderedList(newList);
+    } else {
+      setErrorMessage(json.error);
     }
   }
 
@@ -197,35 +169,12 @@ export default function EnrollmentReportList({ items, courseClassId }: Props) {
               Sobrenome {arrowIcon("lastName")}
             </th>
             <th
-              onClick={() => handleColumnClick("status")}
-              className="block md:table-cell cursor-pointer"
-            >
-              Situação {arrowIcon("status")}
-            </th>
-            <th
               onClick={() => handleColumnClick("preenrollmentDate")}
               className="block md:table-cell cursor-pointer"
             >
               Pré-inscrito em {arrowIcon("preenrollmentDate")}
             </th>
-            <th
-              onClick={() => handleColumnClick("confirmationDate")}
-              className="block md:table-cell cursor-pointer"
-            >
-              Matriculado em {arrowIcon("confirmationDate")}
-            </th>
-            <th
-              onClick={() => handleColumnClick("lastAccessDate")}
-              className="block md:table-cell cursor-pointer"
-            >
-              Último acesso em {arrowIcon("lastAccessDate")}
-            </th>
-            <th
-              onClick={() => handleColumnClick("progress")}
-              className="block md:table-cell cursor-pointer"
-            >
-              Progresso {arrowIcon("progress")}
-            </th>
+            <th className="block md:table-cell cursor-pointer">Ação</th>
           </tr>
         </thead>
         <tbody>
@@ -238,24 +187,21 @@ export default function EnrollmentReportList({ items, courseClassId }: Props) {
                 <td className="block md:table-cell">{item.name}</td>
                 <td className="block md:table-cell">{item.lastName}</td>
                 <td className="block md:table-cell">
-                  {statusInPtBr(item.lastStatus)}
-                </td>
-                <td className="block md:table-cell">
                   {dtFormatter.format(item.preenrollmentDate)}
                 </td>
-                <td className="block md:table-cell">
-                  {item.confirmationDate &&
-                    dtFormatter.format(item.confirmationDate)}
-                </td>
-                <td className="block md:table-cell">
-                  <RefreshCw
-                    className="inline w-4 cursor-pointer"
-                    onClick={() => handleRefreshClick(item.cpf)}
-                  />{" "}
-                  {formatDate(item.lastAccessDate)}
-                </td>
-                <td className="block md:table-cell text-right">
-                  {item.progress && `${item.progress.toFixed(2)} %`}
+                <td
+                  className="block md:table-cell"
+                  onClick={() => handleEnrollClick(item.student_id)}
+                >
+                  {item.confirmationDate !== null ? (
+                    <span className="text-gray-700">
+                      <UserCheck className="inline w-3" /> Inscrito
+                    </span>
+                  ) : (
+                    <span className="text-blue-600 hover:underline cursor-pointer w-100">
+                      <UserPlus className="inline w-3" /> Inscrever
+                    </span>
+                  )}
                 </td>
               </tr>
             );

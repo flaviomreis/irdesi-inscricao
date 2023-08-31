@@ -65,7 +65,10 @@ export async function POST(
 
     // Se foi selecionado .zip
     if (checked && checked === "true") {
-      if ((lineIndex + 1) % groups == 0 || lineIndex + 1 == enrollment.length) {
+      if (
+        (lineIndex + 1) % groups === 0 ||
+        lineIndex + 1 === enrollment.length
+      ) {
         const fileIndex = Math.floor(lineIndex / groups) + 1;
 
         archive.append(Buffer.from(output.join("\n")), {

@@ -118,6 +118,8 @@ export async function GET(
     (course) => course.id == courseClass.course.moodle_id
   );
 
+  console.log(courseClass.course.moodle_id, index, findCoursesJson);
+
   if (index < 0) {
     return NextResponse.json(
       {

@@ -77,10 +77,10 @@ export default async function AdminCourseClassPage({
         selected: false,
         error: null,
       });
-      status == "Sent" && sentTotal++;
-      status == "Confirmed" && confirmedTotal++;
-      status == "Active" && activeTotal++;
-      status == "Completed" && completedTotal++;
+      status === "Sent" && sentTotal++;
+      status === "Confirmed" && confirmedTotal++;
+      status === "Active" && activeTotal++;
+      status === "Completed" && completedTotal++;
     });
   }
 
@@ -96,7 +96,8 @@ export default async function AdminCourseClassPage({
           courseClassId={courseClassId}
           courseClassMoodleId={courseClass.course.moodle_id}
           dao={dao}
-          city={courseClass?.institution.short_name!}
+          city={courseClass.institution.short_name!}
+          moodle_id={courseClass.course.moodle_id}
           total={{ sentTotal, confirmedTotal, activeTotal, completedTotal }}
         />
       </div>

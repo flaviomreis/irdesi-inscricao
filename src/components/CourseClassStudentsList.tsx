@@ -8,6 +8,7 @@ import DownloadButton from "./DownloadButton";
 type Props = {
   courseClassId: string;
   city: string;
+  moodle_id: string;
   total: {
     sentTotal: number;
     confirmedTotal: number;
@@ -36,10 +37,10 @@ export default function CourseClassStudentsList(props: Props) {
   const router = useRouter();
 
   function handleChecks(e: HTMLInputElement) {
-    e.name == "sentCheck" && props.toogleSentChecked();
-    e.name == "confirmedCheck" && props.toogleConfirmedChecked();
-    e.name == "activeCheck" && props.toogleActiveChecked();
-    e.name == "completedCheck" && props.toogleCompletedChecked();
+    e.name === "sentCheck" && props.toogleSentChecked();
+    e.name === "confirmedCheck" && props.toogleConfirmedChecked();
+    e.name === "activeCheck" && props.toogleActiveChecked();
+    e.name === "completedCheck" && props.toogleCompletedChecked();
   }
 
   async function handleSyncButton() {
@@ -80,6 +81,7 @@ export default function CourseClassStudentsList(props: Props) {
           body: JSON.stringify({
             item,
             city: props.city,
+            moodle_id: props.moodle_id,
           }),
         }).then(async (result) => {
           result.json().then((json) => {
@@ -101,6 +103,7 @@ export default function CourseClassStudentsList(props: Props) {
   //         body: JSON.stringify({
   //           items: props.items,
   //           city: props.city,
+  //           moodle_id: props.moodle_id,
   //         }),
   //       }).then(async (result) => {
   //         result.json().then((json) => {
@@ -239,16 +242,16 @@ export default function CourseClassStudentsList(props: Props) {
                       checked={enrollment.selected}
                       onChange={() => props.handleOnSelectChange(enrollment.id)}
                     />
-                    {enrollment.status == "Sent" && (
+                    {enrollment.status === "Sent" && (
                       <div className="h-2 w-2 rounded-full bg-yellow-400"></div>
                     )}
-                    {enrollment.status == "Confirmed" && (
+                    {enrollment.status === "Confirmed" && (
                       <div className="h-2 w-2 rounded-full bg-blue-500"></div>
                     )}
-                    {enrollment.status == "Active" && (
+                    {enrollment.status === "Active" && (
                       <div className="h-2 w-2 rounded-full bg-green-500"></div>
                     )}
-                    {enrollment.status == "Completed" && (
+                    {enrollment.status === "Completed" && (
                       <div className="h-2 w-2 rounded-full bg-black"></div>
                     )}
                     <a href={`/admin/enrollment/${enrollment.id}`}>

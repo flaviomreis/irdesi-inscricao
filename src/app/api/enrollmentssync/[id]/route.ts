@@ -187,12 +187,12 @@ export async function PUT(
     );
   }
 
-  if (findUserJson.length == 0) {
+  if (findUserJson.length === 0) {
     await updateEnrollmentToSent(enrollment.id);
     return NextResponse.json(
       {
         error:
-          enrollment.enrollment_status[0].enrollment_status_type == "Sent"
+          enrollment.enrollment_status[0].enrollment_status_type === "Sent"
             ? "Aluno não criado no Moodle. Inscrição mantida como Enviada"
             : "Aluna não criado no Moodle. Inscrição alterada para Enviada",
       },
@@ -257,11 +257,11 @@ export async function PUT(
       );
 
       const newStatusPtBR =
-        newStatus == "Sent"
+        newStatus === "Sent"
           ? "Enviada"
-          : newStatus == "Confirmed"
+          : newStatus === "Confirmed"
           ? "Confirmada"
-          : newStatus == "Active"
+          : newStatus === "Active"
           ? "Ativa"
           : "Concluída";
 
@@ -279,7 +279,7 @@ export async function PUT(
       return NextResponse.json(
         {
           error:
-            enrollment.enrollment_status[0].enrollment_status_type == "Sent"
+            enrollment.enrollment_status[0].enrollment_status_type === "Sent"
               ? "Aluno inscrito em outro curso. Inscrição mantida como Enviada"
               : "Aluna inscrita em outro curso. Inscrição alterada para Enviada",
         },
@@ -291,7 +291,7 @@ export async function PUT(
     return NextResponse.json(
       {
         error:
-          enrollment.enrollment_status[0].enrollment_status_type == "Sent"
+          enrollment.enrollment_status[0].enrollment_status_type === "Sent"
             ? "Aluno não inscrito em curso. Inscrição mantida como Enviada"
             : "Aluno não inscrito em curso. Inscrição alterada para Enviada",
       },
@@ -346,7 +346,7 @@ export async function PUT(
 
 //     const findUserJson = await sendMoodleRequest(findUserParams);
 
-//     if (Array.isArray(findUserJson) && findUserJson.length == 1) {
+//     if (Array.isArray(findUserJson) && findUserJson.length === 1) {
 //       const userId = findUserJson[0].id;
 
 //       const findCoursesParams = {

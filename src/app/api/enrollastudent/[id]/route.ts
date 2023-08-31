@@ -1,18 +1,40 @@
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "../../auth/[...nextauth]/route";
 import isAdministrator from "@/utils/is-administrator";
-import { CourseClassStudentsDAO } from "@/dao/CourseClassStudentsDAO";
 import { prisma } from "@/db/connection";
 import sendMoodleRequest from "@/utils/moodle-request";
 
 const conn = prisma;
 
-async function setEnrollmentStatusAsConfirmed(id: string, status: string) {
-  if (status === "Sent") {
+async function setEnrollmentStatusAsConfirmed(
+  courseClassId: string,
+  studentId: string
+) {
+  const enrollment = await conn.enrollment.findUnique({
+    where: {
+      enrollment: {
+        course_class_id: courseClassId,
+        student_id: studentId,
+      },
+    },
+    include: {
+      enrollment_status: {
+        take: 1,
+        orderBy: {
+          created_at: "desc",
+        },
+      },
+    },
+  });
+
+  if (
+    enrollment &&
+    enrollment.enrollment_status[0].enrollment_status_type === "Sent"
+  ) {
     await conn.enrollment.update({
       where: {
-        id,
+        id: enrollment.id,
       },
       data: {
         enrollment_status: {
@@ -27,21 +49,72 @@ async function setEnrollmentStatusAsConfirmed(id: string, status: string) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function getCourseClass(id: string) {
+  return await conn.courseClass.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      course_class_administrators: true,
+      course: true,
+      institution: true,
+    },
+  });
+}
+
+async function getStudent(id: string) {
+  return await conn.student.findUnique({
+    where: {
+      id,
+    },
+  });
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const session = await getServerSession(authOptions);
 
-  if (
-    !session ||
-    !session.user ||
-    !(await isAdministrator(session.user.email))
-  ) {
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 401 });
+  }
+
+  const course_id = request.nextUrl.searchParams.get("course_id") as string;
+  const courseClass = await getCourseClass(course_id);
+
+  if (!courseClass) {
+    return NextResponse.json(
+      { error: "ID de Turma inválido" },
+      { status: 400 }
+    );
+  }
+
+  const student_id = params.id;
+
+  if (!student_id) {
+    return NextResponse.json(
+      { error: "O ID do estudante é necessário" },
+      { status: 400 }
+    );
+  }
+
+  const isCourseAdministrator = courseClass.course_class_administrators.find(
+    (item) => item.email === session.user?.email
+  );
+
+  if (!isAdministrator(session.user.name) || !isCourseAdministrator) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 
-  const body = await request.json();
-  const item = body.item as CourseClassStudentsDAO;
-  const city = body.city;
-  const moodle_id = body.moodle_id;
+  const student = await getStudent(student_id);
+
+  if (!student) {
+    return NextResponse.json(
+      { error: "ID de Estudante inválido" },
+      { status: 400 }
+    );
+  }
 
   // Consulta se estudante já existe com o CPF como username
   const findUserParams = {
@@ -49,16 +122,25 @@ export async function POST(request: NextRequest) {
     wsfunction: "core_user_get_users_by_field",
     moodlewsrestformat: "json",
     field: "username",
-    "values[0]": item.cpf,
+    "values[0]": student.cpf,
   };
 
-  const { result, json: findUserJson } = await sendMoodleRequest(
-    findUserParams
-  );
-  if (!result.ok) {
+  const { result: findUserResult, json: findUserJson } =
+    await sendMoodleRequest(findUserParams);
+
+  if (!findUserResult.ok) {
     return NextResponse.json(
-      { error: "Ocorreu um erro ao tentar consultar o aluno no Moodle." },
-      { status: result.status }
+      { error: "Erro ao tentar buscar o aluno no Moodle" },
+      { status: 404 }
+    );
+  }
+
+  if (!Array.isArray(findUserJson)) {
+    return NextResponse.json(
+      {
+        error: "Erro na resposta do Moodle, era esperada uma coleção de alunos",
+      },
+      { status: 404 }
     );
   }
 
@@ -72,12 +154,12 @@ export async function POST(request: NextRequest) {
       wstoken: process.env.MOODLE_CREATE_USER_TOKEN!,
       wsfunction: "core_user_create_users",
       moodlewsrestformat: "json",
-      "users[0][username]": item.cpf,
+      "users[0][username]": student.cpf,
       "users[0][createpassword]": 1,
-      "users[0][firstname]": item.name,
-      "users[0][lastname]": item.lastName,
-      "users[0][email]": item.email,
-      "users[0][city]": city,
+      "users[0][firstname]": student.name,
+      "users[0][lastname]": student.last_name,
+      "users[0][email]": student.email,
+      "users[0][city]": courseClass.institution.short_name,
       "users[0][timezone]": "America/Sao_Paulo",
       "users[0][country]": "BR",
     };
@@ -86,7 +168,7 @@ export async function POST(request: NextRequest) {
     if (!result.ok) {
       return NextResponse.json(
         { error: "Ocorreu um erro ao tentar criar o aluno no Moodle." },
-        { status: result.status }
+        { status: 404 }
       );
     }
 
@@ -112,12 +194,14 @@ export async function POST(request: NextRequest) {
           error:
             "Ocorreu um erro ao tentar buscar inscrição do aluno no curso do Moodle.",
         },
-        { status: result.status }
+        { status: 404 }
       );
     }
 
     if (Array.isArray(findEnrollJson)) {
-      const index = findEnrollJson.findIndex((item) => item.id == moodle_id);
+      const index = findEnrollJson.findIndex(
+        (item) => item.id === courseClass.course.moodle_id
+      );
 
       if (index >= 0) {
         userEnrolled = true;
@@ -132,7 +216,7 @@ export async function POST(request: NextRequest) {
       moodlewsrestformat: "json",
       "enrolments[0][roleid]": 5,
       "enrolments[0][userid]": userId,
-      "enrolments[0][courseid]": 2,
+      "enrolments[0][courseid]": courseClass.course.moodle_id,
     };
 
     const { result, json: enrollJson } = await sendMoodleRequest(enrollParams);
@@ -142,7 +226,7 @@ export async function POST(request: NextRequest) {
           error:
             "Ocorreu um erro ao tentar inscrever o aluno no curso do Moodle.",
         },
-        { status: result.status }
+        { status: 404 }
       );
     }
 
@@ -154,7 +238,7 @@ export async function POST(request: NextRequest) {
             error:
               "Ocorreu um erro ao tentar inscrever o aluno, recém criado, no curso",
           },
-          { status: 500 }
+          { status: 404 }
         );
       } else {
         return NextResponse.json(
@@ -162,7 +246,7 @@ export async function POST(request: NextRequest) {
             error:
               "Ocorreu um erro ao tentar inscrever o aluno, já existente, no curso",
           },
-          { status: 500 }
+          { status: 404 }
         );
       }
     }
@@ -171,11 +255,11 @@ export async function POST(request: NextRequest) {
       {
         error: "O aluno já existe e já está inscrito no curso",
       },
-      { status: 200 }
+      { status: 404 }
     );
   }
 
-  setEnrollmentStatusAsConfirmed(item.id, item.status);
+  setEnrollmentStatusAsConfirmed(courseClass.id, student.id);
 
   if (!userExists) {
     return NextResponse.json(

@@ -10,6 +10,7 @@ type Props = {
   courseClassMoodleId: string;
   dao: CourseClassStudentsDAO[];
   city: string;
+  moodle_id: string;
   total: {
     sentTotal: number;
     confirmedTotal: number;
@@ -23,6 +24,7 @@ export default function CourseClassStudents({
   courseClassMoodleId,
   dao,
   city,
+  moodle_id,
   total,
 }: Props) {
   const [operating, setOperating] = useState(false);
@@ -36,16 +38,16 @@ export default function CourseClassStudents({
 
   function applyFilter() {
     const filter = dao.filter((item) => {
-      if (item.status == "Sent" && sentChecked) {
+      if (item.status === "Sent" && sentChecked) {
         return true;
       }
-      if (item.status == "Confirmed" && confirmedChecked) {
+      if (item.status === "Confirmed" && confirmedChecked) {
         return true;
       }
-      if (item.status == "Active" && activeChecked) {
+      if (item.status === "Active" && activeChecked) {
         return true;
       }
-      if (item.status == "Completed" && completedChecked) {
+      if (item.status === "Completed" && completedChecked) {
         return true;
       }
     });
@@ -111,6 +113,7 @@ export default function CourseClassStudents({
       courseClassId={courseClassId}
       courseClassMoodleId={courseClassMoodleId}
       city={city}
+      moodle_id={moodle_id}
       total={total}
       items={items}
       showOperatingReport={showOperatingReport}
