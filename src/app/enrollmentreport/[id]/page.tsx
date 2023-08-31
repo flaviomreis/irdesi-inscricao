@@ -1,7 +1,6 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import UserAuthBar from "@/components/UserAuthBar";
-import EnrollmentReportList from "@/components/enrollmentreport/EnrollmentReportList";
-import PreEnrollmentReportList from "@/components/enrollmentreport/PreEnrollmentReportList";
+import ShowEnrollmentReports from "@/components/enrollmentreport/ShowEnrollmentReports";
 import { prisma } from "@/db/connection";
 import NextAuthProvider from "@/providers/auth";
 import isAdministrator from "@/utils/is-administrator";
@@ -102,6 +101,19 @@ function fillReportItems(courseClass: CourseClassData) {
       }
     });
   }
+  // preEnrollmentItems.push({
+  //   student_id: "ead09ab3-c83e-46bd-a4ad-9b9c19fe5c86",
+  //   cpf: "16453549034",
+  //   email: "flaviomreispgers@gmail.com",
+  //   name: "Elizeu Moreira",
+  //   lastName: "dos Reis",
+  //   employeeId: "",
+  //   lastStatus: "Sent",
+  //   preenrollmentDate: new Date(),
+  //   confirmationDate: null,
+  //   lastAccessDate: null,
+  //   progress: null,
+  // });
   return [reportItems, preEnrollmentItems];
 }
 
@@ -127,13 +139,16 @@ export default async function EnrollmentReport({
     return <div>Turma não encontrada!</div>;
   }
 
-  if (!isAdministrator(session.user?.email)) {
-    const courseClassAdministrators =
+  let canEnrollStudent = false;
+  const isAdmin = await isAdministrator(session.user?.email);
+
+  if (!isAdmin) {
+    const courseClassAdministrator =
       courseClass.course_class_administrators.find(
         (item) => item.email === session.user?.email
       );
 
-    if (!courseClassAdministrators) {
+    if (!courseClassAdministrator) {
       return (
         <NextAuthProvider>
           <div className="container mx-auto p-4">
@@ -143,12 +158,16 @@ export default async function EnrollmentReport({
         </NextAuthProvider>
       );
     }
+    canEnrollStudent = courseClassAdministrator.canEnrollStudent;
+  } else {
+    canEnrollStudent = true;
   }
 
-  let reportItems: EnrollmentReportItem[] = [];
-  let preEnrollmentItems: EnrollmentReportItem[] = [];
+  let enrollmentReportItems: EnrollmentReportItem[] = [];
+  let preEnrollmentReportItems: EnrollmentReportItem[] = [];
   if (courseClass) {
-    [reportItems, preEnrollmentItems] = fillReportItems(courseClass);
+    [enrollmentReportItems, preEnrollmentReportItems] =
+      fillReportItems(courseClass);
   }
 
   return (
@@ -168,30 +187,16 @@ export default async function EnrollmentReport({
         </p>
         <p className="text-violet-800 text-lg">
           Turma: {courseClass.course.name} ({courseClass.description})<br />
-          {courseClass.amountOfStudents} vagas
+          {plural("vaga", courseClass.amountOfStudents)}
         </p>
       </div>
 
-      <div className="flex flex-col gap-2 justify-items-center items-center text-center p-2">
-        <p className="text-yellow-600 text-lg">
-          Relação de Alunos Não Matriculados (
-          {plural("inscrição", preEnrollmentItems.length)})
-        </p>
-      </div>
-      <PreEnrollmentReportList
-        items={preEnrollmentItems}
+      <ShowEnrollmentReports
         courseClassId={courseClass.id}
-      />
-
-      <div className="flex flex-col gap-2 justify-items-center items-center text-center p-2 mt-4">
-        <p className="text-blue-600 text-lg">
-          Relação de Alunos Matriculados (
-          {plural("inscrição", reportItems.length)})
-        </p>
-      </div>
-      <EnrollmentReportList
-        items={reportItems}
-        courseClassId={courseClass.id}
+        enrollmentReportItems={enrollmentReportItems}
+        preEnrollmentReportItems={preEnrollmentReportItems}
+        canEnrollStudent={canEnrollStudent}
+        amountOfStudents={courseClass.amountOfStudents}
       />
     </NextAuthProvider>
   );

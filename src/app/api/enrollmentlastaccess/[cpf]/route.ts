@@ -40,11 +40,12 @@ export async function GET(
     return NextResponse.json({ error: "CPF é necessário" }, { status: 400 });
   }
 
+  const isAdmin = await isAdministrator(session.user.email);
   const isCourseAdministrator = courseClass.course_class_administrators.find(
     (item) => item.email === session.user?.email
   );
 
-  if (!isAdministrator(session.user.name) || !isCourseAdministrator) {
+  if (!isAdmin && !isCourseAdministrator) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 
@@ -117,8 +118,6 @@ export async function GET(
   const index = findCoursesJson.findIndex(
     (course) => course.id == courseClass.course.moodle_id
   );
-
-  console.log(courseClass.course.moodle_id, index, findCoursesJson);
 
   if (index < 0) {
     return NextResponse.json(

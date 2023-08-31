@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 type Props = {
   title: string;
   question: string;
@@ -24,13 +26,13 @@ export default function ModalDialog(props: Props) {
             <div className="flex  gap-2 mb-2">
               <button
                 onClick={() => props.closeDialog()}
-                className="text-center w-32 p-2 rounded-md bg-purple-800 hover:bg-purple-600 text-white"
+                className="text-center w-32 p-2 rounded-md bg-purple-800 hover:bg-purple-600 text-white disabled:bg-gray-500"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => handleConfirmButton()}
-                className="text-center w-32 p-2 rounded-md bg-red-600 hover:bg-red-800 text-white"
+                className="text-center w-32 p-2 rounded-md bg-red-600 hover:bg-red-800 text-white disabled:bg-gray-500"
               >
                 Confirmar
               </button>

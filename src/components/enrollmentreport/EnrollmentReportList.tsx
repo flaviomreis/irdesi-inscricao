@@ -2,11 +2,13 @@
 
 import { EnrollmentReportItem } from "@/app/enrollmentreport/[id]/page";
 import dtFormatter from "@/utils/date-formatter";
+import plural from "@/utils/plural";
 import { ArrowDown, ArrowUp, Dot, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Props = {
-  items: EnrollmentReportItem[];
+  orderedList: EnrollmentReportItem[];
+  setOrderedList: (list: EnrollmentReportItem[]) => void;
   courseClassId: string;
 };
 
@@ -49,11 +51,16 @@ function numberSort(
   }
 }
 
-export default function EnrollmentReportList({ items, courseClassId }: Props) {
+export default function EnrollmentReportList({
+  orderedList,
+  setOrderedList,
+  courseClassId,
+}: Props) {
   const [order, setOrder] = useState("name");
-  const [orderedList, setOrderedList] = useState(items);
   const [errorMessage, setErrorMessage] = useState("");
   const [ascSorting, setAscSorting] = useState(true);
+  const [isRunning, setIsRunning] = useState(false);
+  const [showOkButton, setShowOkButton] = useState(false);
   const zeroDate = new Date(0);
 
   useEffect(() => {
@@ -94,7 +101,9 @@ export default function EnrollmentReportList({ items, courseClassId }: Props) {
   }
 
   async function handleRefreshClick(cpf: string) {
-    setErrorMessage("");
+    setIsRunning(true);
+    setShowOkButton(false);
+    setErrorMessage("Executando operação, por favor, aguarde!");
     const result = await fetch(
       `/api/enrollmentlastaccess/${cpf}?course_id=${courseClassId}`
     );
@@ -120,8 +129,10 @@ export default function EnrollmentReportList({ items, courseClassId }: Props) {
         }
       });
       setOrderedList(newList);
+      setIsRunning(false);
     } else {
       setErrorMessage(json.error);
+      setShowOkButton(true);
     }
   }
 
@@ -135,14 +146,26 @@ export default function EnrollmentReportList({ items, courseClassId }: Props) {
       : "Concluída";
   }
 
-  function formatDate(date: Date | null) {
+  function formatDate(date: Date | null, cpf: string) {
     if (date === null) {
       return (
-        <span className="text-blue-700 text-xs">Ainda não atualizado</span>
+        <span
+          className="text-blue-700 text-xs cursor-pointer"
+          onClick={() => handleRefreshClick(cpf)}
+        >
+          <RefreshCw className="inline w-4" />
+          &nbsp; Ainda não atualizado
+        </span>
       );
     } else if (date.valueOf() === zeroDate.valueOf()) {
       return (
-        <span className="text-gray-700 text-xs">Ainda não acessou o curso</span>
+        <span
+          className="text-gray-700 text-xs cursor-pointer"
+          onClick={() => handleRefreshClick(cpf)}
+        >
+          <RefreshCw className="inline w-4" />
+          &nbsp; Ainda não acessou o curso
+        </span>
       );
     }
     return dtFormatter.format(date);
@@ -162,7 +185,10 @@ export default function EnrollmentReportList({ items, courseClassId }: Props) {
 
   return (
     <div className="py-2 px-4 flex flex-col items-center">
-      <div className="text-red-500">{errorMessage}&nbsp;</div>
+      <p className="text-blue-600 text-lg">
+        Relação de Alunos Matriculados (
+        {plural("inscrição", orderedList.length)})
+      </p>
       <table className="text-left table-auto w-full">
         <thead className="border-b border-gray-400">
           <tr>
@@ -248,11 +274,8 @@ export default function EnrollmentReportList({ items, courseClassId }: Props) {
                     dtFormatter.format(item.confirmationDate)}
                 </td>
                 <td className="block md:table-cell">
-                  <RefreshCw
-                    className="inline w-4 cursor-pointer"
-                    onClick={() => handleRefreshClick(item.cpf)}
-                  />{" "}
-                  {formatDate(item.lastAccessDate)}
+                  {" "}
+                  {formatDate(item.lastAccessDate, item.cpf)}
                 </td>
                 <td className="block md:table-cell text-right">
                   {item.progress && `${item.progress.toFixed(2)} %`}
@@ -262,6 +285,30 @@ export default function EnrollmentReportList({ items, courseClassId }: Props) {
           })}
         </tbody>
       </table>
+      {isRunning && (
+        <div className="flex justify-center fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm">
+          <div className="flex flex-col h-fit w-[320px] bg-white rounded-md  gap-4 border border-gray-400 shadow-lg">
+            <p className="bg-blue-600 text-center rounded-md p-1 text-white font-semibold">
+              Informação
+            </p>
+            <div className="flex flex-col px-8 gap-4">
+              <p className="text-center break-normal">{errorMessage}</p>
+              <div
+                className={`flex gap-2 mb-2 justify-center ${
+                  showOkButton ? "visible" : "invisible"
+                }`}
+              >
+                <button
+                  onClick={() => setIsRunning(false)}
+                  className="text-center w-32 p-2 rounded-md bg-purple-800 hover:bg-purple-600 text-white disabled:bg-gray-500"
+                >
+                  Ciente
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

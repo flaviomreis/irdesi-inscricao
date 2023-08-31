@@ -99,11 +99,14 @@ export async function GET(
     );
   }
 
+  const isAdmin = await isAdministrator(session.user.email);
   const isCourseAdministrator = courseClass.course_class_administrators.find(
     (item) => item.email === session.user?.email
   );
 
-  if (!isAdministrator(session.user.name) || !isCourseAdministrator) {
+  console.log(session.user.email, !isAdmin && !isCourseAdministrator);
+
+  if (!isAdmin && !isCourseAdministrator) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 

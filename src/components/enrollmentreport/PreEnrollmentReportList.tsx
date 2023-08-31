@@ -2,19 +2,17 @@
 
 import { EnrollmentReportItem } from "@/app/enrollmentreport/[id]/page";
 import dtFormatter from "@/utils/date-formatter";
-import {
-  ArrowDown,
-  ArrowUp,
-  Dot,
-  RefreshCw,
-  UserCheck,
-  UserPlus,
-} from "lucide-react";
+import plural from "@/utils/plural";
+import { ArrowDown, ArrowUp, Dot, UserCheck, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Props = {
-  items: EnrollmentReportItem[];
+  enrollmentReportItems: EnrollmentReportItem[];
+  setEnrollmentReportItems: (list: EnrollmentReportItem[]) => void;
+  preEnrollmentReportItems: EnrollmentReportItem[];
+  setPreEnrollmentReportItems: (list: EnrollmentReportItem[]) => void;
   courseClassId: string;
+  amountOfStudents: number;
 };
 
 function stringSort(
@@ -43,31 +41,23 @@ function dateSort(
   }
 }
 
-function numberSort(
-  a: EnrollmentReportItem,
-  b: EnrollmentReportItem,
-  field: keyof EnrollmentReportItem,
-  ascSorting: boolean
-) {
-  if (ascSorting) {
-    return Number(a[field]) - Number(b[field]);
-  } else {
-    return Number(b[field]) - Number(a[field]);
-  }
-}
-
 export default function PreEnrollmentReportList({
-  items,
+  enrollmentReportItems,
+  setEnrollmentReportItems,
+  preEnrollmentReportItems,
+  setPreEnrollmentReportItems,
   courseClassId,
+  amountOfStudents,
 }: Props) {
   const [order, setOrder] = useState("name");
-  const [orderedList, setOrderedList] = useState(items);
   const [ascSorting, setAscSorting] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isRunning, setIsRunning] = useState(false);
+  const [showOkButton, setShowOkButton] = useState(false);
   const zeroDate = new Date(0);
 
   useEffect(() => {
-    const copy = [...orderedList];
+    const copy = [...preEnrollmentReportItems];
     if (order === "cpf") {
       copy.sort((a, b) => stringSort(a, b, "cpf", ascSorting));
     }
@@ -86,7 +76,7 @@ export default function PreEnrollmentReportList({
     if (order === "preenrollmentDate") {
       copy.sort((a, b) => dateSort(a, b, "preenrollmentDate", ascSorting));
     }
-    setOrderedList(copy);
+    setPreEnrollmentReportItems(copy);
   }, [order, ascSorting]);
 
   function handleColumnClick(field: string) {
@@ -107,6 +97,17 @@ export default function PreEnrollmentReportList({
   }
 
   async function handleEnrollClick(student_id: string) {
+    setIsRunning(true);
+
+    if (amountOfStudents <= enrollmentReportItems.length) {
+      setShowOkButton(true);
+      setErrorMessage(
+        "Alcançado limite de alunos para a turma. Não foi possível matricular."
+      );
+      return;
+    }
+    setShowOkButton(false);
+    setErrorMessage("Executando operação, por favor, aguarde!");
     const result = await fetch(
       `/api/enrollastudent/${student_id}?course_id=${courseClassId}`
     );
@@ -114,27 +115,35 @@ export default function PreEnrollmentReportList({
     const json = await result.json();
 
     if (result.status === 200) {
-      const newList = orderedList.map((item) => {
-        if (item.student_id === student_id) {
-          const confirmationDate = new Date();
-          return {
-            ...item,
-            confirmationDate,
-          };
-        } else {
+      const newList = preEnrollmentReportItems.filter((item) => {
+        if (item.student_id !== student_id) {
           return item;
         }
       });
 
-      setOrderedList(newList);
-    } else {
-      setErrorMessage(json.error);
+      const newItem = preEnrollmentReportItems.find(
+        (item) => item.student_id === student_id
+      );
+      if (newItem) {
+        newItem.confirmationDate = new Date();
+        newItem.lastAccessDate = zeroDate;
+        const newList = [newItem, ...enrollmentReportItems];
+        setEnrollmentReportItems(newList);
+      }
+
+      setPreEnrollmentReportItems(newList);
     }
+    setErrorMessage(json.error);
+    setShowOkButton(true);
   }
 
   return (
-    <div className="py-2 px-4 flex flex-col items-center">
-      <div className="text-red-500">{errorMessage}&nbsp;</div>
+    <div className="py-2 px-4 flex flex-col items-center mb-4">
+      <p className="text-yellow-600 text-lg">
+        Relação de Alunos não Matriculados (
+        {plural("inscrição", preEnrollmentReportItems.length)})
+      </p>
+
       <table className="text-left table-auto w-full">
         <thead className="border-b border-gray-400">
           <tr>
@@ -166,7 +175,7 @@ export default function PreEnrollmentReportList({
               onClick={() => handleColumnClick("lastName")}
               className="block md:table-cell cursor-pointer"
             >
-              Sobrenome {arrowIcon("lastName")}
+              Inscrito Sobrenome {arrowIcon("lastName")}
             </th>
             <th
               onClick={() => handleColumnClick("preenrollmentDate")}
@@ -178,7 +187,7 @@ export default function PreEnrollmentReportList({
           </tr>
         </thead>
         <tbody>
-          {orderedList.map((item) => {
+          {preEnrollmentReportItems.map((item) => {
             return (
               <tr key={item.cpf} className="even:bg-white odd:bg-gray-200">
                 <td className="block md:table-cell">{item.cpf}</td>
@@ -193,21 +202,39 @@ export default function PreEnrollmentReportList({
                   className="block md:table-cell"
                   onClick={() => handleEnrollClick(item.student_id)}
                 >
-                  {item.confirmationDate !== null ? (
-                    <span className="text-gray-700">
-                      <UserCheck className="inline w-3" /> Inscrito
-                    </span>
-                  ) : (
-                    <span className="text-blue-600 hover:underline cursor-pointer w-100">
-                      <UserPlus className="inline w-3" /> Inscrever
-                    </span>
-                  )}
+                  <span className="text-blue-600 hover:underline cursor-pointer w-100">
+                    <UserPlus className="inline w-3" /> Matricular
+                  </span>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+      {isRunning && (
+        <div className="flex justify-center fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm">
+          <div className="flex flex-col h-fit w-[320px] bg-white rounded-md  gap-4 border border-gray-400 shadow-lg">
+            <p className="bg-blue-600 text-center rounded-md p-1 text-white font-semibold">
+              Informação
+            </p>
+            <div className="flex flex-col px-8 gap-4">
+              <p className="text-center break-normal">{errorMessage}</p>
+              <div
+                className={`flex gap-2 mb-2 justify-center ${
+                  showOkButton ? "visible" : "invisible"
+                }`}
+              >
+                <button
+                  onClick={() => setIsRunning(false)}
+                  className="text-center w-32 p-2 rounded-md bg-purple-800 hover:bg-purple-600 text-white disabled:bg-gray-500"
+                >
+                  Ciente
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

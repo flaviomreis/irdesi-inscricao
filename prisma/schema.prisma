@@ -46,10 +46,11 @@ model CourseClass {
 }
 
 model CourseClassAdministrator {
-  id              String      @id @default(uuid())
-  course_class_id String
-  course_class    CourseClass @relation(fields: [course_class_id], references: [id])
-  email           String
+  id               String      @id @default(uuid())
+  course_class_id  String
+  course_class     CourseClass @relation(fields: [course_class_id], references: [id])
+  email            String
+  canEnrollStudent Boolean     @default(false)
 
   @@unique([course_class_id, email])
 }
