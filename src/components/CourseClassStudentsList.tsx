@@ -35,6 +35,8 @@ type Props = {
 export default function CourseClassStudentsList(props: Props) {
   const [synchronizing, setSynchronizing] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
+  const [progressTotal, setProgressTotal] = useState(0);
+  const [progressIndex, setProgressIndex] = useState(0);
   const router = useRouter();
 
   function handleChecks(e: HTMLInputElement) {
@@ -44,8 +46,10 @@ export default function CourseClassStudentsList(props: Props) {
     e.name === "completedCheck" && props.toogleCompletedChecked();
   }
 
+  const delay = (ms: number) =>
+    new Promise<void>((resolve) => setTimeout(resolve, ms));
+
   async function handleSyncButton() {
-    setSynchronizing(true);
     // const result = await fetch(
     //   `/api/enrollmentssync/${props.courseClassId}?moodle_id=${props.courseClassMoodleId}`
     // );
@@ -71,6 +75,19 @@ export default function CourseClassStudentsList(props: Props) {
     // });
 
     const newList = [...props.items];
+    let countSelected = 0;
+    for (let i = 0; i < newList.length; i++) {
+      const item = newList[i];
+      countSelected += item.selected ? 1 : 0;
+    }
+
+    if (countSelected < 1) {
+      return;
+    }
+
+    setSynchronizing(true);
+    setProgressTotal(countSelected);
+
     for (let i = 0; i < newList.length; i++) {
       const item = newList[i];
       if (item.selected) {
@@ -90,6 +107,7 @@ export default function CourseClassStudentsList(props: Props) {
           }
         }
         item.error = json.error;
+        setProgressIndex(progressIndex + 1);
       }
     }
     props.setItems(newList);
@@ -221,7 +239,9 @@ export default function CourseClassStudentsList(props: Props) {
             disabled={synchronizing}
             onClick={handleSyncButton}
           >
-            {synchronizing ? "Sincronizando" : "Sincronizar"}
+            {synchronizing
+              ? `Sincronizando ${progressIndex}/${progressTotal}`
+              : "Sincronizar"}
           </button>
           <button
             className="flex items-center justify-center w-full md:w-max md:px-2 bg-purple-800 text-sm rounded font-bold text-white h-10 hover:bg-purple-600"
