@@ -16,6 +16,7 @@ type Props = {
     completedTotal: number;
   };
   items: CourseClassStudentsDAO[];
+  setItems: (items: CourseClassStudentsDAO[]) => void;
   showOperatingReport: () => void;
   sentChecked: boolean;
   confirmedChecked: boolean;
@@ -52,21 +53,48 @@ export default function CourseClassStudentsList(props: Props) {
     //   const json = await result.json();
     // }
     // router.back();
-    props.items.map(async (item) => {
+
+    // props.items.map(async (item) => {
+    //   if (item.selected) {
+    //     const result = await fetch(
+    //       `/api/enrollmentssync/${item.id}?moodle_id=${props.courseClassMoodleId}`,
+    //       {
+    //         method: "PUT",
+    //       }
+    //     ).then(async (result) => {
+    //       result.json().then((json) => {
+    //         item.error = json.error;
+    //         props.showOperatingReport();
+    //       });
+    //     });
+    //   }
+    // });
+
+    const newList = [...props.items];
+    for (let i = 0; i < newList.length; i++) {
+      const item = newList[i];
       if (item.selected) {
         const result = await fetch(
           `/api/enrollmentssync/${item.id}?moodle_id=${props.courseClassMoodleId}`,
           {
             method: "PUT",
           }
-        ).then(async (result) => {
-          result.json().then((json) => {
-            item.error = json.error;
-            props.showOperatingReport();
-          });
-        });
+        );
+        const json = await result.json();
+        if (json.studentData) {
+          const data = json.studentData;
+          if (item.cpf === data.cpf) {
+            item.email = data.moodle.email;
+            item.name = data.moodle.name;
+            item.lastName = data.moodle.lastName;
+          }
+        }
+        item.error = json.error;
       }
-    });
+    }
+    props.setItems(newList);
+    setSynchronizing(false);
+    props.showOperatingReport();
   }
 
   async function handleSubscribeButton() {

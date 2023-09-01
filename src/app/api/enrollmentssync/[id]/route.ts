@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import sendMoodleRequest from "@/utils/moodle-request";
 
-async function updateEnrollmentStatusIfNecessary(
+export async function updateEnrollmentStatusIfNecessary(
   enrollment_id: string,
   enrollmentStatusType: string,
   courseLastAccess: number | null,
@@ -43,20 +43,34 @@ async function updateEnrollmentStatusIfNecessary(
   return newStatus;
 }
 
-async function updateUserEmailIfNecessary(
-  studentId: string,
-  studentEmail: string,
-  moodleEmail: string
-) {
-  if (studentEmail !== moodleEmail) {
+export type StudentProps = {
+  studentId: string;
+  cpf: string;
+  actual: {
+    email: string;
+    name: string;
+    lastName: string;
+  };
+  moodle: {
+    email: string;
+    name: string;
+    lastName: string;
+  };
+};
+
+export async function updateUserIfNecessary(data: StudentProps) {
+  if (JSON.stringify(data.actual) !== JSON.stringify(data.moodle)) {
     await prisma.student.update({
       where: {
-        id: studentId,
+        id: data.studentId,
       },
       data: {
-        email: moodleEmail,
+        email: data.moodle.email,
+        name: data.moodle.name,
+        last_name: data.moodle.lastName,
       },
     });
+    return data;
   }
 }
 
@@ -174,7 +188,7 @@ export async function PUT(
   if (!findUserResult.ok) {
     return NextResponse.json(
       { error: "Erro ao tentar buscar o aluno no Moodle" },
-      { status: findUserResult.status }
+      { status: 404 }
     );
   }
 
@@ -183,7 +197,7 @@ export async function PUT(
       {
         error: "Erro na resposta do Moodle, era esperada uma coleção de alunos",
       },
-      { status: findUserResult.status }
+      { status: 404 }
     );
   }
 
@@ -196,7 +210,7 @@ export async function PUT(
             ? "Aluno não criado no Moodle. Inscrição mantida como Enviada"
             : "Aluna não criado no Moodle. Inscrição alterada para Enviada",
       },
-      { status: findUserResult.status }
+      { status: 200 }
     );
   } else if (findUserJson.length != 1) {
     return NextResponse.json(
@@ -204,18 +218,28 @@ export async function PUT(
         error:
           "Erro na resposta do Moodle, era esperada uma coleção com apenas um aluno",
       },
-      { status: findUserResult.status }
+      { status: 404 }
     );
   }
 
-  const userId = findUserJson[0].id;
-  const userEmail = findUserJson[0].email;
-  updateUserEmailIfNecessary(
-    enrollment.student_id,
-    enrollment.student.email,
-    userEmail
-  );
+  const userData: StudentProps = {
+    studentId: enrollment.student_id,
+    cpf: findUserJson[0].username,
+    actual: {
+      email: enrollment.student.email,
+      name: enrollment.student.name,
+      lastName: enrollment.student.last_name,
+    },
+    moodle: {
+      email: findUserJson[0].email,
+      name: findUserJson[0].firstname,
+      lastName: findUserJson[0].lastname,
+    },
+  };
 
+  const studentData = await updateUserIfNecessary(userData);
+
+  const userId = findUserJson[0].id;
   const findCoursesParams = {
     wstoken: process.env.MOODLE_GET_TOKEN!,
     wsfunction: "core_enrol_get_users_courses",
@@ -228,8 +252,11 @@ export async function PUT(
 
   if (!findCoursesResult.ok) {
     return NextResponse.json(
-      { error: "Erro ao tentar buscar inscrições do aluno no Moodle" },
-      { status: findCoursesResult.status }
+      {
+        error: "Erro ao tentar buscar inscrições do aluno no Moodle",
+        studentData,
+      },
+      { status: 404 }
     );
   }
 
@@ -237,8 +264,9 @@ export async function PUT(
     return NextResponse.json(
       {
         error: "Erro na resposta do Moodle, era esperada uma coleção de cursos",
+        studentData,
       },
-      { status: findCoursesResult.status }
+      { status: 404 }
     );
   }
 
@@ -271,6 +299,7 @@ export async function PUT(
             enrollment.enrollment_status[0].enrollment_status_type !== newStatus
               ? `Inscrição alterada para ${newStatusPtBR}`
               : `Inscrição mantida como ${newStatusPtBR}`,
+          studentData,
         },
         { status: 200 }
       );
@@ -282,6 +311,7 @@ export async function PUT(
             enrollment.enrollment_status[0].enrollment_status_type === "Sent"
               ? "Aluno inscrito em outro curso. Inscrição mantida como Enviada"
               : "Aluna inscrita em outro curso. Inscrição alterada para Enviada",
+          studentData,
         },
         { status: 200 }
       );
@@ -294,6 +324,7 @@ export async function PUT(
           enrollment.enrollment_status[0].enrollment_status_type === "Sent"
             ? "Aluno não inscrito em curso. Inscrição mantida como Enviada"
             : "Aluno não inscrito em curso. Inscrição alterada para Enviada",
+        studentData,
       },
       { status: 200 }
     );

@@ -4,6 +4,11 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import isAdministrator from "@/utils/is-administrator";
 import { prisma } from "@/db/connection";
 import sendMoodleRequest from "@/utils/moodle-request";
+import {
+  StudentProps,
+  updateEnrollmentStatusIfNecessary,
+  updateUserIfNecessary,
+} from "../../enrollmentssync/[id]/route";
 
 async function getCourseClass(id: string) {
   return await prisma.courseClass.findUnique({
@@ -15,6 +20,38 @@ async function getCourseClass(id: string) {
       course: true,
     },
   });
+}
+
+async function getStudent(cpf: string) {
+  const result = await prisma.student.findUnique({
+    where: {
+      cpf,
+    },
+  });
+
+  return result;
+}
+
+async function getEnrollment(studentId: string, courseClassId: string) {
+  const result = await prisma.enrollment.findUnique({
+    where: {
+      enrollment: {
+        student_id: studentId,
+        course_class_id: courseClassId,
+      },
+    },
+    include: {
+      student: true,
+      enrollment_status: {
+        take: 1,
+        orderBy: {
+          created_at: "desc",
+        },
+      },
+    },
+  });
+
+  return result;
 }
 
 export async function GET(
@@ -78,8 +115,34 @@ export async function GET(
     );
   }
 
-  const userId = findUserJson[0].id;
+  const student = await getStudent(cpf);
+  if (!student) {
+    return NextResponse.json(
+      {
+        error: "Erro ao tentar buscar Aluno pelo CPF",
+      },
+      { status: 404 }
+    );
+  }
 
+  const userData: StudentProps = {
+    studentId: student.id,
+    cpf: findUserJson[0].email,
+    actual: {
+      email: student.email,
+      name: student.name,
+      lastName: student.last_name,
+    },
+    moodle: {
+      email: findUserJson[0].email,
+      name: findUserJson[0].firstname,
+      lastName: findUserJson[0].lastname,
+    },
+  };
+
+  const studentData = await updateUserIfNecessary(userData);
+
+  const userId = findUserJson[0].id;
   const findCoursesParams = {
     wstoken: process.env.MOODLE_GET_TOKEN!,
     wsfunction: "core_enrol_get_users_courses",
@@ -92,7 +155,10 @@ export async function GET(
 
   if (!findCoursesResult.ok) {
     return NextResponse.json(
-      { error: "Erro ao tentar buscar inscrições do aluno no Moodle" },
+      {
+        error: "Erro ao tentar buscar inscrições do aluno no Moodle",
+        studentData,
+      },
       { status: 404 }
     );
   }
@@ -101,6 +167,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: "Erro na resposta do Moodle, era esperada uma coleção de cursos",
+        studentData,
       },
       { status: 404 }
     );
@@ -110,6 +177,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: "Aluno não matriculado no curso",
+        studentData,
       },
       { status: 404 }
     );
@@ -123,6 +191,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: "Aluno não matriculado no curso",
+        studentData,
       },
       { status: 404 }
     );
@@ -130,11 +199,30 @@ export async function GET(
 
   const courseLastAccess = findCoursesJson[index].lastaccess;
   const courseProgress = findCoursesJson[index].progress;
+  const courseCompleted = findCoursesJson[index].completed;
+  const enrollment = await getEnrollment(student.id, courseClass.id);
+  if (!enrollment) {
+    return NextResponse.json(
+      {
+        error: "Erro ao buscar matrícula do aluno",
+        studentData,
+      },
+      { status: 500 }
+    );
+  }
+  const newStatus = await updateEnrollmentStatusIfNecessary(
+    enrollment.id,
+    enrollment.enrollment_status[0].enrollment_status_type,
+    courseLastAccess,
+    courseCompleted
+  );
 
   return NextResponse.json(
     {
       courseLastAccess,
       courseProgress,
+      studentData,
+      enrollmentStatus: newStatus,
     },
     { status: 200 }
   );

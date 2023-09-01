@@ -110,24 +110,33 @@ export default function EnrollmentReportList({
 
     const json = await result.json();
 
-    if (result.status === 200) {
-      const lastAccessDate =
-        json.courseLastAccess === null
-          ? zeroDate
-          : new Date(Number(json.courseLastAccess) * 1000);
-      const progress =
-        json.courseLastAccess === null ? null : json.courseProgress;
-      const newList = orderedList.map((item) => {
-        if (item.cpf === cpf) {
-          return {
-            ...item,
-            lastAccessDate,
-            progress,
-          };
-        } else {
-          return item;
+    const newList = [...orderedList];
+    for (let i = 0; i < newList.length; i++) {
+      const item = newList[i];
+      if (item.cpf === cpf) {
+        if (result.status === 200) {
+          const lastAccessDate =
+            json.courseLastAccess === null
+              ? zeroDate
+              : new Date(Number(json.courseLastAccess) * 1000);
+          const progress =
+            json.courseLastAccess === null ? null : json.courseProgress;
+          item.lastAccessDate = lastAccessDate;
+          item.progress = progress;
         }
-      });
+        if (json.studentData) {
+          const moodleData = json.studentData.moodle;
+          item.email = moodleData.email;
+          item.name = moodleData.name;
+          item.lastName = moodleData.lastName;
+        }
+        if (json.enrollmentStatus) {
+          item.lastStatus = json.enrollmentStatus;
+        }
+      }
+    }
+
+    if (result.status === 200) {
       setOrderedList(newList);
       setIsRunning(false);
     } else {

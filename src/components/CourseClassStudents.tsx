@@ -116,6 +116,7 @@ export default function CourseClassStudents({
       moodle_id={moodle_id}
       total={total}
       items={items}
+      setItems={setItems}
       showOperatingReport={showOperatingReport}
       sentChecked={sentChecked}
       confirmedChecked={confirmedChecked}
