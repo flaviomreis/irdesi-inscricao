@@ -99,13 +99,13 @@ export default function PreEnrollmentReportList({
   async function handleEnrollClick(student_id: string) {
     setIsRunning(true);
 
-    // if (amountOfStudents <= enrollmentReportItems.length) {
-    //   setShowOkButton(true);
-    //   setErrorMessage(
-    //     "Alcançado limite de alunos para a turma. Não foi possível matricular."
-    //   );
-    //   return;
-    // }
+    if (amountOfStudents <= enrollmentReportItems.length) {
+      setShowOkButton(true);
+      setErrorMessage(
+        "Alcançado limite de alunos para a turma. Não foi possível matricular."
+      );
+      return;
+    }
     setShowOkButton(false);
     setErrorMessage("Executando operação, por favor, aguarde!");
     const result = await fetch(

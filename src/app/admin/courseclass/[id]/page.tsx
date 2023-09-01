@@ -6,6 +6,7 @@ import CourseClassStudents from "@/components/CourseClassStudents";
 import { prisma } from "@/db/connection";
 import { Metadata } from "next";
 import dtFormatter from "@/utils/date-formatter";
+import plural from "@/utils/plural";
 
 export const metadata: Metadata = {
   title: "Irdesi - Administração de Pré-Inscrições",
@@ -89,7 +90,8 @@ export default async function AdminCourseClassPage({
       <div className="flex flex-1 flex-col gap-2">
         <h2>Contrato: {courseClass.institution.short_name}</h2>
         <h2>
-          Turma: {courseClass.course.short_name} ({courseClass.description})
+          Turma: {courseClass.course.short_name} ({courseClass.description}){" "}
+          {plural("vaga", courseClass.amountOfStudents)}
         </h2>
         <h2>Estudantes:</h2>
         <CourseClassStudents
