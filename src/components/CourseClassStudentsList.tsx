@@ -36,7 +36,7 @@ export default function CourseClassStudentsList(props: Props) {
   const [synchronizing, setSynchronizing] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
   const [progressTotal, setProgressTotal] = useState(0);
-  const [progressIndex, setProgressIndex] = useState(0);
+  const [progressIndex, setProgressIndex] = useState(1);
   const router = useRouter();
 
   function handleChecks(e: HTMLInputElement) {
@@ -87,6 +87,7 @@ export default function CourseClassStudentsList(props: Props) {
 
     setSynchronizing(true);
     setProgressTotal(countSelected);
+    let index = 1;
 
     for (let i = 0; i < newList.length; i++) {
       const item = newList[i];
@@ -98,16 +99,16 @@ export default function CourseClassStudentsList(props: Props) {
           }
         );
         const json = await result.json();
-        if (json.studentData) {
-          const data = json.studentData;
+        const data = await json.studentData;
+        if (data) {
           if (item.cpf === data.cpf) {
             item.email = data.moodle.email;
             item.name = data.moodle.name;
             item.lastName = data.moodle.lastName;
           }
         }
-        item.error = json.error;
-        setProgressIndex(progressIndex + 1);
+        item.error = await json.error;
+        setProgressIndex(++index);
       }
     }
     props.setItems(newList);
