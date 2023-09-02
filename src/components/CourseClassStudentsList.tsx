@@ -50,30 +50,6 @@ export default function CourseClassStudentsList(props: Props) {
     new Promise<void>((resolve) => setTimeout(resolve, ms));
 
   async function handleSyncButton() {
-    // const result = await fetch(
-    //   `/api/enrollmentssync/${props.courseClassId}?moodle_id=${props.courseClassMoodleId}`
-    // );
-    // if (result.status !== 200) {
-    //   const json = await result.json();
-    // }
-    // router.back();
-
-    // props.items.map(async (item) => {
-    //   if (item.selected) {
-    //     const result = await fetch(
-    //       `/api/enrollmentssync/${item.id}?moodle_id=${props.courseClassMoodleId}`,
-    //       {
-    //         method: "PUT",
-    //       }
-    //     ).then(async (result) => {
-    //       result.json().then((json) => {
-    //         item.error = json.error;
-    //         props.showOperatingReport();
-    //       });
-    //     });
-    //   }
-    // });
-
     const newList = [...props.items];
     let countSelected = 0;
     for (let i = 0; i < newList.length; i++) {
@@ -117,8 +93,23 @@ export default function CourseClassStudentsList(props: Props) {
   }
 
   async function handleSubscribeButton() {
+    const newList = [...props.items];
+    let countSelected = 0;
+    for (let i = 0; i < newList.length; i++) {
+      const item = newList[i];
+      countSelected += item.selected ? 1 : 0;
+    }
+
+    if (countSelected < 1) {
+      return;
+    }
+
     setSubscribing(true);
-    props.items.map(async (item) => {
+    setProgressTotal(countSelected);
+    let index = 1;
+
+    for (let i = 0; i < newList.length; i++) {
+      const item = newList[i];
       if (item.selected) {
         const result = await fetch(`/api/enrollincourseclass`, {
           method: "POST",
@@ -130,35 +121,24 @@ export default function CourseClassStudentsList(props: Props) {
             city: props.city,
             moodle_id: props.moodle_id,
           }),
-        }).then(async (result) => {
-          result.json().then((json) => {
-            item.error = json.error;
-            props.showOperatingReport();
-          });
         });
+        const json = await result.json();
+        const data = await json.studentData;
+        if (data) {
+          if (item.cpf === data.cpf) {
+            item.email = data.moodle.email;
+            item.name = data.moodle.name;
+            item.lastName = data.moodle.lastName;
+          }
+        }
+        item.error = await json.error;
+        setProgressIndex(++index);
       }
-    });
+    }
+    props.setItems(newList);
+    setSubscribing(false);
+    props.showOperatingReport();
   }
-
-  // async function handleSubscribeButton() {
-  //   setSubscribing(true);
-  //       const result = await fetch(`/api/enrollincourseclass`, {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           items: props.items,
-  //           city: props.city,
-  //           moodle_id: props.moodle_id,
-  //         }),
-  //       }).then(async (result) => {
-  //         result.json().then((json) => {
-  //           item.error = json.error;
-  //           props.showOperatingReport();
-  //         });
-  //       });
-  // }
 
   async function handleDownloadButton(zip: boolean, groups: number) {
     const result = await fetch(
@@ -249,7 +229,9 @@ export default function CourseClassStudentsList(props: Props) {
             disabled={subscribing}
             onClick={handleSubscribeButton}
           >
-            {subscribing ? "Inscrevendo" : "Inscrever"}
+            {subscribing
+              ? `Inscrevendo ${progressIndex}/${progressTotal}`
+              : "inscrever"}
           </button>
         </div>
       </div>
