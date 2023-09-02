@@ -241,32 +241,31 @@ export default function CourseClassStudentsList(props: Props) {
         handleButton={handleDownloadButton}
       />
 
-      <div className="flex-1 mt-2">
-        <table className="min-w-full text-left">
-          <thead className="border-b border-gray-400">
-            <tr className="flex flex-col md:flex-row">
-              <th className="flex items-center gap-1 md:w-[15%]">
+      <table className="table-auto w-full text-left">
+        <thead className="border-b border-gray-400">
+          <tr>
+            <th className="block md:table-cell">
+              <div className="flex items-center gap-1">
                 <input
                   type="checkbox"
                   checked={props.checkAll}
                   onChange={props.handleCheckAll}
                 />
                 CPF
-              </th>
-              <th className="md:w-[25%]">email</th>
-              <th className="md:w-[30%]">Nome</th>
-              <th className="md:w-[20%]">Sobrenome</th>
-              <th className="md:w-[10%]">Pré-inscrição em</th>
-            </tr>
-          </thead>
-          <tbody>
-            {props.items.map((enrollment) => {
-              return (
-                <tr
-                  key={enrollment.id}
-                  className="flex flex-col md:flex-row even:bg-white odd:bg-gray-200"
-                >
-                  <td className="flex items-center gap-2 md:w-[15%]">
+              </div>
+            </th>
+            <th className="block md:table-cell">email</th>
+            <th className="block md:table-cell">Nome</th>
+            <th className="block md:table-cell">Sobrenome</th>
+            <th className="block md:table-cell">Pré-inscrição em</th>
+          </tr>
+        </thead>
+        <tbody>
+          {props.items.map((enrollment) => {
+            return (
+              <tr key={enrollment.id} className="even:bg-white odd:bg-gray-200">
+                <td className="block md:table-cell">
+                  <div className="flex items-center gap-1">
                     <input
                       type="checkbox"
                       id={`checkbox-${enrollment.id}`}
@@ -288,17 +287,17 @@ export default function CourseClassStudentsList(props: Props) {
                     <a href={`/admin/enrollment/${enrollment.id}`}>
                       {enrollment.cpf}
                     </a>
-                  </td>
-                  <td className="md:w-[25%]">{enrollment.email}</td>
-                  <td className="md:w-[30%]">{enrollment.name}</td>
-                  <td className="md:w-[20%]">{enrollment.lastName}</td>
-                  <td className="md:w-[10%]">{enrollment.created_at}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                  </div>
+                </td>
+                <td className="block md:table-cell">{enrollment.email}</td>
+                <td className="block md:table-cell">{enrollment.name}</td>
+                <td className="block md:table-cell">{enrollment.lastName}</td>
+                <td className="block md:table-cell">{enrollment.created_at}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
