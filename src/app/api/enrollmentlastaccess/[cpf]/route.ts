@@ -98,6 +98,7 @@ export async function GET(
   const { result: findUserResult, json: findUserJson } =
     await sendMoodleRequest(findUserParams);
 
+  console.log(findUserResult, findUserResult.ok);
   if (!findUserResult.ok) {
     return NextResponse.json(
       { error: "Erro ao tentar buscar o aluno no Moodle" },

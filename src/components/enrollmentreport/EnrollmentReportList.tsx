@@ -108,6 +108,14 @@ export default function EnrollmentReportList({
       `/api/enrollmentlastaccess/${cpf}?course_id=${courseClassId}`
     );
 
+    if (!result.ok) {
+      setErrorMessage(
+        "Falha na operação. Tente novamente em alguns minutos, por favor."
+      );
+      setShowOkButton(true);
+      return;
+    }
+
     const json = await result.json();
 
     const newList = [...orderedList];
@@ -243,12 +251,12 @@ export default function EnrollmentReportList({
             >
               Pré-inscrito em {arrowIcon("preenrollmentDate")}
             </th>
-            <th
+            {/* <th
               onClick={() => handleColumnClick("confirmationDate")}
               className="block md:table-cell cursor-pointer"
             >
               Matriculado em {arrowIcon("confirmationDate")}
-            </th>
+            </th> */}
             <th
               onClick={() => handleColumnClick("lastAccessDate")}
               className="block md:table-cell cursor-pointer"
@@ -278,10 +286,10 @@ export default function EnrollmentReportList({
                 <td className="block md:table-cell">
                   {dtFormatter.format(item.preenrollmentDate)}
                 </td>
-                <td className="block md:table-cell">
+                {/* <td className="block md:table-cell">
                   {item.confirmationDate &&
                     dtFormatter.format(item.confirmationDate)}
-                </td>
+                </td> */}
                 <td className="block md:table-cell">
                   {" "}
                   {formatDate(item.lastAccessDate, item.cpf)}
