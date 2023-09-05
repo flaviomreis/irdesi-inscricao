@@ -18,32 +18,16 @@ async function setEnrollmentStatusAsConfirmed(
         student_id: studentId,
       },
     },
-    include: {
-      enrollment_status: {
-        take: 1,
-        orderBy: {
-          created_at: "desc",
-        },
-      },
-    },
   });
 
-  if (
-    enrollment &&
-    enrollment.enrollment_status[0].enrollment_status_type === "Sent"
-  ) {
+  if (enrollment) {
     await conn.enrollment.update({
       where: {
         id: enrollment.id,
+        confirmed_at: null,
       },
       data: {
-        enrollment_status: {
-          create: [
-            {
-              enrollment_status_type: "Confirmed",
-            },
-          ],
-        },
+        confirmed_at: new Date(),
       },
     });
   }
@@ -61,12 +45,6 @@ async function getCourseClass(id: string) {
       enrollment: {
         include: {
           student: true,
-          enrollment_status: {
-            take: 1,
-            orderBy: {
-              created_at: "desc",
-            },
-          },
         },
       },
     },
@@ -115,8 +93,6 @@ export async function GET(
     (item) => item.email === session.user?.email
   );
 
-  console.log(session.user.email, !isAdmin && !isCourseAdministrator);
-
   if (!isAdmin && !isCourseAdministrator) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
@@ -124,8 +100,7 @@ export async function GET(
   const courseLimitOfStudents = courseClass.amountOfStudents;
   let courseAmountOfEnrollments = 0;
   courseClass.enrollment.map((item) => {
-    const amount =
-      item.enrollment_status[0].enrollment_status_type !== "Sent" ? 1 : 0;
+    const amount = item.confirmed_at ? 1 : 0;
     courseAmountOfEnrollments += amount;
   });
 

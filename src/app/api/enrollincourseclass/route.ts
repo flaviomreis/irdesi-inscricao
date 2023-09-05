@@ -13,15 +13,10 @@ async function setEnrollmentStatusAsConfirmed(id: string, status: string) {
     await conn.enrollment.update({
       where: {
         id,
+        confirmed_at: null,
       },
       data: {
-        enrollment_status: {
-          create: [
-            {
-              enrollment_status_type: "Confirmed",
-            },
-          ],
-        },
+        confirmed_at: new Date(),
       },
     });
   }

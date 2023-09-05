@@ -115,7 +115,6 @@ export async function POST(
       "Content-Disposition",
       `attachment; filename=${courseClass.institution.short_name}-${courseClass.course.short_name}.csv`
     );
-    //console.log(output.join("\n"));
     return new NextResponse(output.join("\n"), { status: 200, headers });
   }
 }

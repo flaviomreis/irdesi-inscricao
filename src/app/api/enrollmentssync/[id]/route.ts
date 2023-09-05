@@ -5,42 +5,62 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import sendMoodleRequest from "@/utils/moodle-request";
 
+export function getStatusType(
+  enrollmentConfirmedAt: Date | null,
+  courseLastAccess: Date | number | null,
+  courseProgress: number
+) {
+  const statusType = courseLastAccess
+    ? courseProgress < 100
+      ? "Active"
+      : "Completed"
+    : !enrollmentConfirmedAt
+    ? "Sent"
+    : "Confirmed";
+
+  return statusType;
+}
+
 export async function updateEnrollmentStatusIfNecessary(
   enrollment_id: string,
-  enrollmentStatusType: string,
+  actualStatusType: string,
+  enrollmentConfirmedAt: Date | null,
   courseLastAccess: number | null,
-  courseCompleted: boolean
+  courseProgress: number
 ) {
-  let newStatus = "";
-
-  if (courseCompleted) {
-    newStatus = "Completed";
-  } else {
-    if (courseLastAccess !== null) {
-      newStatus = "Active";
+  const newStatusType = getStatusType(
+    enrollmentConfirmedAt,
+    courseLastAccess,
+    courseProgress
+  );
+  if (actualStatusType != newStatusType) {
+    if (courseLastAccess) {
+      await prisma.enrollment.update({
+        where: {
+          id: enrollment_id,
+        },
+        data: {
+          confirmed_at:
+            enrollmentConfirmedAt ?? new Date(courseLastAccess * 1000),
+          last_access_at: new Date(courseLastAccess * 1000),
+          progress: courseProgress,
+        },
+      });
     } else {
-      newStatus = "Confirmed";
+      await prisma.enrollment.update({
+        where: {
+          id: enrollment_id,
+        },
+        data: {
+          confirmed_at: null,
+          last_access_at: null,
+          progress: 0,
+        },
+      });
     }
   }
 
-  if (enrollmentStatusType != newStatus) {
-    await prisma.enrollment.update({
-      where: {
-        id: enrollment_id,
-      },
-      data: {
-        enrollment_status: {
-          create: [
-            {
-              enrollment_status_type: newStatus,
-            },
-          ],
-        },
-      },
-    });
-  }
-
-  return newStatus;
+  return newStatusType;
 }
 
 export type StudentProps = {
@@ -75,51 +95,16 @@ export async function updateUserIfNecessary(data: StudentProps) {
 }
 
 async function updateEnrollmentToSent(enrollment_id: string) {
-  await prisma.enrollmentStatus.deleteMany({
+  await prisma.enrollment.update({
     where: {
-      AND: [
-        {
-          enrollment_id,
-        },
-        {
-          enrollment_status_type: {
-            not: "Sent",
-          },
-        },
-      ],
+      id: enrollment_id,
+    },
+    data: {
+      confirmed_at: null,
+      last_access_at: null,
+      progress: 0,
     },
   });
-}
-
-async function getCourseClass(id: string) {
-  const result = await prisma.courseClass.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      enrollment: {
-        include: {
-          student: true,
-          enrollment_status: {
-            take: 1,
-            orderBy: {
-              created_at: "desc",
-            },
-          },
-        },
-        orderBy: [
-          {
-            student: {
-              name: "asc",
-            },
-          },
-        ],
-      },
-      institution: true,
-      course: true,
-    },
-  });
-  return result;
 }
 
 async function getEnrollment(id: string) {
@@ -129,12 +114,6 @@ async function getEnrollment(id: string) {
     },
     include: {
       student: true,
-      enrollment_status: {
-        take: 1,
-        orderBy: {
-          created_at: "desc",
-        },
-      },
     },
   });
 
@@ -201,12 +180,26 @@ export async function PUT(
     );
   }
 
+  // const statusType = !enrollment.confirmed_at
+  //   ? "Sent"
+  //   : !enrollment.last_access_at
+  //   ? "Confirmed"
+  //   : enrollment.progress < 100
+  //   ? "Active"
+  //   : "Completed";
+
+  const statusType = getStatusType(
+    enrollment.confirmed_at,
+    enrollment.last_access_at,
+    enrollment.progress
+  );
+
   if (findUserJson.length === 0) {
     await updateEnrollmentToSent(enrollment.id);
     return NextResponse.json(
       {
         error:
-          enrollment.enrollment_status[0].enrollment_status_type === "Sent"
+          statusType === "Sent"
             ? "Aluno não criado no Moodle. Inscrição mantida como Enviada"
             : "Aluna não criado no Moodle. Inscrição alterada para Enviada",
       },
@@ -275,30 +268,36 @@ export async function PUT(
 
     if (index >= 0) {
       const courseLastAccess = findCoursesJson[index].lastaccess;
-      const courseCompleted = findCoursesJson[index].completed;
+      const courseProgress = findCoursesJson[index].progress;
 
-      const newStatus = await updateEnrollmentStatusIfNecessary(
+      const actualStatusType = getStatusType(
+        enrollment.confirmed_at,
+        enrollment.last_access_at,
+        enrollment.progress
+      );
+      const newStatusType = await updateEnrollmentStatusIfNecessary(
         enrollment.id,
-        enrollment.enrollment_status[0].enrollment_status_type,
+        actualStatusType,
+        enrollment.confirmed_at,
         courseLastAccess,
-        courseCompleted
+        courseProgress
       );
 
-      const newStatusPtBR =
-        newStatus === "Sent"
+      const newStatusTypePtBR =
+        newStatusType === "Sent"
           ? "Enviada"
-          : newStatus === "Confirmed"
+          : newStatusType === "Confirmed"
           ? "Confirmada"
-          : newStatus === "Active"
+          : newStatusType === "Active"
           ? "Ativa"
           : "Concluída";
 
       return NextResponse.json(
         {
           error:
-            enrollment.enrollment_status[0].enrollment_status_type !== newStatus
-              ? `Inscrição alterada para ${newStatusPtBR}`
-              : `Inscrição mantida como ${newStatusPtBR}`,
+            statusType !== newStatusType
+              ? `Inscrição alterada para ${newStatusTypePtBR}`
+              : `Inscrição mantida como ${newStatusTypePtBR}`,
           studentData,
         },
         { status: 200 }
@@ -308,7 +307,7 @@ export async function PUT(
       return NextResponse.json(
         {
           error:
-            enrollment.enrollment_status[0].enrollment_status_type === "Sent"
+            statusType === "Sent"
               ? "Aluno inscrito em outro curso. Inscrição mantida como Enviada"
               : "Aluna inscrita em outro curso. Inscrição alterada para Enviada",
           studentData,
@@ -321,7 +320,7 @@ export async function PUT(
     return NextResponse.json(
       {
         error:
-          enrollment.enrollment_status[0].enrollment_status_type === "Sent"
+          statusType === "Sent"
             ? "Aluno não inscrito em curso. Inscrição mantida como Enviada"
             : "Aluno não inscrito em curso. Inscrição alterada para Enviada",
         studentData,
@@ -330,82 +329,3 @@ export async function PUT(
     );
   }
 }
-
-// export async function GET(
-//   request: NextRequest,
-//   { params }: { params: { id: string } }
-// ) {
-//   const session = await getServerSession(authOptions);
-
-//   if (
-//     !session ||
-//     !session.user ||
-//     !(await isAdministrator(session.user.email))
-//   ) {
-//     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-//   }
-
-//   const id = params.id;
-//   const moodle_id = request.nextUrl.searchParams.get("moodle_id") as string;
-//   if (!moodle_id) {
-//     return NextResponse.json(
-//       { error: `O id do curso no Moodle não foi enviado.` },
-//       { status: 401 }
-//     );
-//   }
-
-//   const courseClass = await getCourseClass(id);
-
-//   if (!courseClass) {
-//     return NextResponse.json(
-//       { error: `A turma ${id} não existe.` },
-//       { status: 401 }
-//     );
-//   }
-
-//   const enrollments = courseClass.enrollment;
-//   for (let i = 0; i < enrollments.length; i++) {
-//     const enrollment = enrollments[i];
-//     // Consulta se estudante já existe com o CPF como username
-//     const findUserParams = {
-//       wstoken: process.env.MOODLE_GET_TOKEN!,
-//       wsfunction: "core_user_get_users_by_field",
-//       moodlewsrestformat: "json",
-//       field: "username",
-//       "values[0]": enrollment.student.cpf,
-//     };
-
-//     const findUserJson = await sendMoodleRequest(findUserParams);
-
-//     if (Array.isArray(findUserJson) && findUserJson.length === 1) {
-//       const userId = findUserJson[0].id;
-
-//       const findCoursesParams = {
-//         wstoken: process.env.MOODLE_GET_TOKEN!,
-//         wsfunction: "core_enrol_get_users_courses",
-//         moodlewsrestformat: "json",
-//         userid: userId,
-//       };
-
-//       const findCoursesJson = await sendMoodleRequest(findCoursesParams);
-
-//       if (Array.isArray(findCoursesJson) && findCoursesJson.length > 0) {
-//         const index = findCoursesJson.findIndex(
-//           (course) => course.id == moodle_id
-//         );
-
-//         if (index >= 0) {
-//           await updateEnrollmentStatusIfNecessary(
-//             enrollment.id,
-//             enrollment.enrollment_status[0].enrollment_status_type
-//           );
-//         }
-//       }
-//     }
-//   }
-
-//   return NextResponse.json(
-//     { error: "Sincronização concluída." },
-//     { status: 200 }
-//   );
-// }

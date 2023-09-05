@@ -18,6 +18,5 @@ export default async function sendMoodleRequest(
     }
   );
   const json = await result.json();
-  //console.log("result", result.ok, result.status);
   return { result: { ok: result.ok, status: result.status }, json };
 }

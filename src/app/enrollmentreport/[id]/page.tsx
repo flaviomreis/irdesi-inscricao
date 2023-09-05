@@ -1,4 +1,5 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getStatusType } from "@/app/api/enrollmentssync/[id]/route";
 import UserAuthBar from "@/components/UserAuthBar";
 import ShowEnrollmentReports from "@/components/enrollmentreport/ShowEnrollmentReports";
 import { prisma } from "@/db/connection";
@@ -33,12 +34,6 @@ type CourseClassPayload = {
     enrollment: {
       include: {
         student: true;
-        enrollment_status: {
-          take: 1;
-          orderBy: {
-            created_at: "desc";
-          };
-        };
       };
     };
     institution: true;
@@ -56,12 +51,6 @@ async function getCourseClass(id: string) {
       enrollment: {
         include: {
           student: true,
-          enrollment_status: {
-            take: 1,
-            orderBy: {
-              created_at: "desc",
-            },
-          },
         },
       },
       institution: true,
@@ -80,6 +69,11 @@ function fillReportItems(courseClass: CourseClassData) {
 
   if (courseClass) {
     courseClass.enrollment.map((item) => {
+      const statusType = getStatusType(
+        item.confirmed_at,
+        item.last_access_at,
+        item.progress
+      );
       const obj: EnrollmentReportItem = {
         student_id: item.student_id,
         cpf: item.student.cpf,
@@ -87,33 +81,20 @@ function fillReportItems(courseClass: CourseClassData) {
         employeeId: item.student.employeeId,
         name: item.student.name,
         lastName: item.student.last_name,
-        lastStatus: item.enrollment_status[0].enrollment_status_type,
+        lastStatus: statusType,
         preenrollmentDate: item.created_at,
-        confirmationDate: item.enrollment_status[0].created_at,
+        confirmationDate: item.confirmed_at,
         lastAccessDate: null,
         progress: null,
       };
 
-      if (item.enrollment_status[0].enrollment_status_type !== "Sent") {
+      if (statusType !== "Sent") {
         reportItems.push(obj);
       } else {
         preEnrollmentItems.push({ ...obj, confirmationDate: null });
       }
     });
   }
-  // preEnrollmentItems.push({
-  //   student_id: "ead09ab3-c83e-46bd-a4ad-9b9c19fe5c86",
-  //   cpf: "16453549034",
-  //   email: "flaviomreispgers@gmail.com",
-  //   name: "Elizeu Moreira",
-  //   lastName: "dos Reis",
-  //   employeeId: "",
-  //   lastStatus: "Sent",
-  //   preenrollmentDate: new Date(),
-  //   confirmationDate: null,
-  //   lastAccessDate: null,
-  //   progress: null,
-  // });
   return [reportItems, preEnrollmentItems];
 }
 

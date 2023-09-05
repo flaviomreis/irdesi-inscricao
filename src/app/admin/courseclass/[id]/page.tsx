@@ -21,12 +21,6 @@ async function getCourseClass(id: string) {
       enrollment: {
         include: {
           student: true,
-          enrollment_status: {
-            take: 1,
-            orderBy: {
-              created_at: "desc",
-            },
-          },
         },
         orderBy: [
           {
@@ -64,8 +58,15 @@ export default async function AdminCourseClassPage({
 
   if (courseClass) {
     courseClass.enrollment.map((enrollment) => {
-      const status = enrollment.enrollment_status[0]
-        .enrollment_status_type as EnrollmentStatusType;
+      // const status = enrollment.enrollment_status[0]
+      //   .enrollment_status_type as EnrollmentStatusType;
+      const status = !enrollment.confirmed_at
+        ? "Sent"
+        : !enrollment.last_access_at
+        ? "Confirmed"
+        : enrollment.progress < 100
+        ? "Active"
+        : "Completed";
 
       dao.push({
         id: enrollment.id,

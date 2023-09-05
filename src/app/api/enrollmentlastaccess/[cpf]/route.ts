@@ -6,6 +6,7 @@ import { prisma } from "@/db/connection";
 import sendMoodleRequest from "@/utils/moodle-request";
 import {
   StudentProps,
+  getStatusType,
   updateEnrollmentStatusIfNecessary,
   updateUserIfNecessary,
 } from "../../enrollmentssync/[id]/route";
@@ -42,12 +43,6 @@ async function getEnrollment(studentId: string, courseClassId: string) {
     },
     include: {
       student: true,
-      enrollment_status: {
-        take: 1,
-        orderBy: {
-          created_at: "desc",
-        },
-      },
     },
   });
 
@@ -98,7 +93,6 @@ export async function GET(
   const { result: findUserResult, json: findUserJson } =
     await sendMoodleRequest(findUserParams);
 
-  console.log(findUserResult, findUserResult.ok);
   if (!findUserResult.ok) {
     return NextResponse.json(
       { error: "Erro ao tentar buscar o aluno no Moodle" },
@@ -200,7 +194,6 @@ export async function GET(
 
   const courseLastAccess = findCoursesJson[index].lastaccess;
   const courseProgress = findCoursesJson[index].progress;
-  const courseCompleted = findCoursesJson[index].completed;
   const enrollment = await getEnrollment(student.id, courseClass.id);
   if (!enrollment) {
     return NextResponse.json(
@@ -211,11 +204,18 @@ export async function GET(
       { status: 500 }
     );
   }
-  const newStatus = await updateEnrollmentStatusIfNecessary(
+
+  const actualStatusType = getStatusType(
+    enrollment.confirmed_at,
+    enrollment.last_access_at,
+    enrollment.progress
+  );
+  const newStatusType = await updateEnrollmentStatusIfNecessary(
     enrollment.id,
-    enrollment.enrollment_status[0].enrollment_status_type,
+    actualStatusType,
+    enrollment.confirmed_at,
     courseLastAccess,
-    courseCompleted
+    courseProgress
   );
 
   return NextResponse.json(
@@ -223,7 +223,7 @@ export async function GET(
       courseLastAccess,
       courseProgress,
       studentData,
-      enrollmentStatus: newStatus,
+      enrollmentStatus: newStatusType,
     },
     { status: 200 }
   );

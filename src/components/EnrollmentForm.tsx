@@ -47,8 +47,6 @@ export default function EnrollmentForm(props: Props) {
   }
 
   async function userEnrollment(data: UserEnrollmentFormData) {
-    console.log("aqui");
-
     const result = await fetch(props.action, {
       method: props.method,
       headers: {

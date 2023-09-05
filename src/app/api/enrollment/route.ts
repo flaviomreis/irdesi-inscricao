@@ -87,12 +87,6 @@ export async function DELETE(request: NextRequest) {
     );
   }
 
-  await prisma.enrollmentStatus.deleteMany({
-    where: {
-      enrollment,
-    },
-  });
-
   await prisma.enrollment.delete({
     where: {
       enrollment: {
@@ -448,13 +442,6 @@ export async function POST(request: NextRequest) {
     data: {
       course_class_id: foundCourseClass.id,
       student_id: student.id,
-      enrollment_status: {
-        create: [
-          {
-            enrollment_status_type: "Sent",
-          },
-        ],
-      },
     },
   });
 
