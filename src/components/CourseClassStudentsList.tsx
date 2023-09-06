@@ -4,6 +4,7 @@ import { CourseClassStudentsDAO } from "@/dao/CourseClassStudentsDAO";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import DownloadButton from "./DownloadButton";
+import plural from "@/utils/plural";
 
 type Props = {
   courseClassId: string;
@@ -173,7 +174,13 @@ export default function CourseClassStudentsList(props: Props) {
   return (
     <div>
       <div className="flex items-start flex-col md:items-center md:flex-row bg-gray-200 gap-2 p-4 rounded-lg border border-gray-400 mb-4">
-        Status da pré-inscrição
+        {plural(
+          "inscrição",
+          props.total.sentTotal +
+            props.total.confirmedTotal +
+            props.total.activeTotal +
+            props.total.completedTotal
+        )}
         <label>
           <input
             type="checkbox"
@@ -231,7 +238,7 @@ export default function CourseClassStudentsList(props: Props) {
           >
             {subscribing
               ? `Inscrevendo ${progressIndex}/${progressTotal}`
-              : "inscrever"}
+              : "Inscrever"}
           </button>
         </div>
       </div>
