@@ -162,6 +162,7 @@ export async function POST(request: NextRequest) {
       }
     }
   } else {
+    setEnrollmentStatusAsConfirmed(item.id, item.status);
     return NextResponse.json(
       {
         error: "O aluno já existe e já está inscrito no curso",

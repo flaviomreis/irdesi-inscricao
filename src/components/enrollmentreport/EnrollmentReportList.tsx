@@ -61,7 +61,6 @@ export default function EnrollmentReportList({
   const [ascSorting, setAscSorting] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
   const [showOkButton, setShowOkButton] = useState(false);
-  const zeroDate = new Date(0);
 
   useEffect(() => {
     const copy = [...orderedList];
@@ -125,12 +124,10 @@ export default function EnrollmentReportList({
         if (result.status === 200) {
           const lastAccessDate =
             json.courseLastAccess === null
-              ? zeroDate
+              ? null
               : new Date(Number(json.courseLastAccess) * 1000);
-          const progress =
-            json.courseLastAccess === null ? null : json.courseProgress;
           item.lastAccessDate = lastAccessDate;
-          item.progress = progress;
+          item.progress = json.courseProgress;
         }
         if (json.studentData) {
           const moodleData = json.studentData.moodle;
@@ -171,21 +168,20 @@ export default function EnrollmentReportList({
           onClick={() => handleRefreshClick(cpf)}
         >
           <RefreshCw className="inline w-4" />
-          &nbsp; Ainda não atualizado
+          &nbsp; Não acessou o curso
         </span>
       );
-    } else if (date.valueOf() === zeroDate.valueOf()) {
+    } else {
       return (
         <span
-          className="text-gray-700 text-xs cursor-pointer"
+          className="text-blue-700 cursor-pointer"
           onClick={() => handleRefreshClick(cpf)}
         >
           <RefreshCw className="inline w-4" />
-          &nbsp; Ainda não acessou o curso
+          &nbsp; {dtFormatter.format(date)}
         </span>
       );
     }
-    return dtFormatter.format(date);
   }
 
   function arrowIcon(column: string) {
@@ -295,7 +291,7 @@ export default function EnrollmentReportList({
                   {formatDate(item.lastAccessDate, item.cpf)}
                 </td>
                 <td className="block md:table-cell text-right">
-                  {item.progress && `${item.progress.toFixed(2)} %`}
+                  {item.progress.toFixed(2)} %
                 </td>
               </tr>
             );

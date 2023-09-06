@@ -26,7 +26,7 @@ export type EnrollmentReportItem = {
   preenrollmentDate: Date;
   confirmationDate: Date | null;
   lastAccessDate: Date | null;
-  progress: Number | null;
+  progress: Number;
 };
 
 type CourseClassPayload = {
@@ -84,8 +84,8 @@ function fillReportItems(courseClass: CourseClassData) {
         lastStatus: statusType,
         preenrollmentDate: item.created_at,
         confirmationDate: item.confirmed_at,
-        lastAccessDate: null,
-        progress: null,
+        lastAccessDate: item.last_access_at,
+        progress: item.progress,
       };
 
       if (statusType !== "Sent") {
