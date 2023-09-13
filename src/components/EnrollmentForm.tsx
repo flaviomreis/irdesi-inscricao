@@ -29,6 +29,7 @@ export default function EnrollmentForm(props: Props) {
 
   const [enrollmentError, setEnrollmentError] = useState<string>("");
   const [isDialogVisible, setIsDialogVisible] = useState<boolean>(false);
+  const [confirmedRepeatedName, setConfirmedRepeatedName] = useState(false);
   const router = useRouter();
 
   async function handleConfirmAction() {
@@ -46,7 +47,31 @@ export default function EnrollmentForm(props: Props) {
     setEnrollmentError(json.error);
   }
 
+  function checkRepeatedName(name: string, lastname: string) {
+    const namepieces = name.split(" ");
+    const lastnamepieces = lastname.split(" ");
+    let repeated = false;
+    namepieces.map((namepiece) => {
+      lastnamepieces.map((lastnamepiece) => {
+        if (lastnamepiece.toLowerCase() === namepiece.toLowerCase()) {
+          repeated = true;
+        }
+      });
+    });
+
+    return repeated;
+  }
+
   async function userEnrollment(data: UserEnrollmentFormData) {
+    const repeteadName = checkRepeatedName(data.name, data.lastName);
+    if (repeteadName && !confirmedRepeatedName) {
+      setEnrollmentError(
+        "Em seu nome há partes do sobrenome. Revise ou Envie novamente para confirmar"
+      );
+      setConfirmedRepeatedName(true);
+      return;
+    }
+
     const result = await fetch(props.action, {
       method: props.method,
       headers: {
@@ -76,7 +101,7 @@ export default function EnrollmentForm(props: Props) {
           <label htmlFor="name">Nome</label>
           <input
             type="text"
-            placeholder="Seu nome"
+            placeholder="Ex. Maria"
             {...register("name")}
             className="border border-zinc-200 shadow-sm rounded h-10 px-3"
           />
@@ -89,7 +114,7 @@ export default function EnrollmentForm(props: Props) {
           <label htmlFor="lastName">Sobrenome</label>
           <input
             type="text"
-            placeholder="Seu sobrenome"
+            placeholder="Ex: Souza da Silva"
             {...register("lastName")}
             className="border border-zinc-200 shadow-sm rounded h-10 px-3"
           />
