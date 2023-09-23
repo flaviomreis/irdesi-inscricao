@@ -33,30 +33,22 @@ export async function updateEnrollmentStatusIfNecessary(
     courseLastAccess,
     courseProgress
   );
-  if (actualStatusType != newStatusType) {
-    if (courseLastAccess) {
-      await prisma.enrollment.update({
-        where: {
-          id: enrollment_id,
-        },
-        data: {
-          confirmed_at:
-            enrollmentConfirmedAt ?? new Date(courseLastAccess * 1000),
-          last_access_at: new Date(courseLastAccess * 1000),
-          progress: courseProgress,
-        },
-      });
-    } else {
-      await prisma.enrollment.update({
-        where: {
-          id: enrollment_id,
-        },
-        data: {
-          confirmed_at: null,
-          last_access_at: null,
-          progress: 0,
-        },
-      });
+
+  if (courseLastAccess) {
+    await prisma.enrollment.update({
+      where: {
+        id: enrollment_id,
+      },
+      data: {
+        // confirmed_at:
+        //   enrollmentConfirmedAt ?? new Date(courseLastAccess * 1000),
+        last_access_at: new Date(courseLastAccess * 1000),
+        progress: courseProgress,
+      },
+    });
+  } else {
+    if (!enrollmentConfirmedAt) {
+      await updateEnrollmentToSent(enrollment_id);
     }
   }
 
@@ -95,16 +87,17 @@ export async function updateUserIfNecessary(data: StudentProps) {
 }
 
 async function updateEnrollmentToSent(enrollment_id: string) {
-  await prisma.enrollment.update({
-    where: {
-      id: enrollment_id,
-    },
-    data: {
-      confirmed_at: null,
-      last_access_at: null,
-      progress: 0,
-    },
-  });
+  // await prisma.enrollment.update({
+  //   where: {
+  //     id: enrollment_id,
+  //   },
+  //   data: {
+  //     confirmed_at: null,
+  //     last_access_at: null,
+  //     progress: 0,
+  //   },
+  // });
+  console.log("Algum muito estranho: Status retornado para Sent");
 }
 
 async function getEnrollment(id: string) {
