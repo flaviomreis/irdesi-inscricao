@@ -6,6 +6,7 @@ export type CourseClassStudentsDAO = {
   name: string;
   lastName: string;
   created_at: string;
+  progress: string;
   selected: boolean;
   error: string | null;
 };

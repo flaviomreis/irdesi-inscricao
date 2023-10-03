@@ -76,6 +76,7 @@ export default async function AdminCourseClassPage({
         name: enrollment.student.name,
         lastName: enrollment.student.last_name,
         created_at: dtFormatter.format(enrollment.created_at),
+        progress: enrollment.progress.toFixed(2),
         selected: false,
         error: null,
       });

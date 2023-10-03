@@ -265,6 +265,7 @@ export default function CourseClassStudentsList(props: Props) {
             <th className="block md:table-cell">Nome</th>
             <th className="block md:table-cell">Sobrenome</th>
             <th className="block md:table-cell">Pré-inscrição em</th>
+            <th className="block md:table-cell">Progresso</th>
           </tr>
         </thead>
         <tbody>
@@ -300,6 +301,9 @@ export default function CourseClassStudentsList(props: Props) {
                 <td className="block md:table-cell">{enrollment.name}</td>
                 <td className="block md:table-cell">{enrollment.lastName}</td>
                 <td className="block md:table-cell">{enrollment.created_at}</td>
+                <td className="block md:table-cell text-right">
+                  {enrollment.progress}
+                </td>
               </tr>
             );
           })}
