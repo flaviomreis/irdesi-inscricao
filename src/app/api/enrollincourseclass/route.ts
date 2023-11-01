@@ -22,6 +22,8 @@ async function setEnrollmentStatusAsConfirmed(id: string, status: string) {
   }
 }
 
+export const maxDuration = 30;
+
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
